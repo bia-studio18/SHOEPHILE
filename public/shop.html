@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Shop SHOEPHILE luxury women's footwear. Premium heels, flats, sandals, sneakers and exclusive collections.">
+  <title>Shop — SHOEPHILE</title>
+  <meta property="og:title" content="SHOEPHILE — Luxury Women's Footwear">
+  <meta property="og:description" content="Premium luxury flats. Love Affair with Shoes. Crafted for the woman who leads.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="/images/logo.jpg">
+  <link rel="icon" href="/images/logo.jpg" type="image/jpeg">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <button class="mobile-menu-btn" aria-label="Open menu"><span></span><span></span><span></span></button>
+      <a href="index.html" class="logo" aria-label="SHOEPHILE Home"><img src="images/logo.jpg" alt="SHOEPHILE — Love Affair with Shoes"></a>
+      <nav class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="shop.html" class="active">Shop</a>
+        <a href="shop.html?category=new">New Arrivals</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+      <div class="header-actions">
+        <button class="header-action" data-search-open aria-label="Search">
+          <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        </button>
+        <button class="theme-toggle" aria-label="Toggle theme"></button>
+        <a href="shop.html" class="header-action" aria-label="Wishlist">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          <span class="wishlist-count" style="display:none">0</span>
+        </a>
+        <a href="cart.html" class="header-action" aria-label="Shopping bag">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          <span class="cart-count" style="display:none">0</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="mobile-overlay"></div>
+  <nav class="mobile-nav">
+    <button class="mobile-nav-close" aria-label="Close menu">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <div class="mobile-nav-links">
+      <a href="index.html">Home</a>
+      <a href="shop.html">Shop</a>
+      <a href="shop.html?category=new">New Arrivals</a>
+      <a href="shop.html?category=flats">Flats</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </div>
+  </nav>
+
+  <div class="search-overlay">
+    <form class="search-form">
+      <div class="search-input-wrap">
+        <input type="search" class="search-input" placeholder="Search shoes..." aria-label="Search">
+        <button type="button" class="search-close" aria-label="Close search">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="page-header">
+    <div class="container">
+      <nav class="breadcrumb"><a href="index.html">Home</a> / Shop</nav>
+      <h1>Shop Collection</h1>
+      <p class="text-muted" style="max-width:480px;margin:0.5rem auto 0;">Discover our complete range of luxury footwear, crafted for the modern woman.</p>
+    </div>
+  </div>
+
+  <section class="section" style="padding-top:0;">
+    <div class="container">
+      <div class="shop-toolbar">
+        <div class="shop-filters">
+          <button class="filter-btn active" data-category="all">All</button>
+          
+          <button class="filter-btn" data-category="flats">Flats</button>
+          
+          
+          <button class="filter-btn" data-category="new">New Arrivals</button>
+          <button class="filter-btn" data-category="luxury">Luxury</button>
+        </div>
+        <div class="shop-sort">
+          <label for="sort-select">Sort by</label>
+          <select id="sort-select">
+            <option value="featured">Featured</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+            <option value="name">Name</option>
+            <option value="rating">Top Rated</option>
+          </select>
+        </div>
+      </div>
+      <div class="product-grid" id="shop-grid"></div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="logo" aria-label="SHOEPHILE Home"><img src="images/logo.jpg" alt="SHOEPHILE — Love Affair with Shoes"></a>
+          <p>Luxury women's footwear crafted for the woman who leads.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Shop</h4>
+          <ul>
+            <li><a href="shop.html">All Products</a></li>
+            <li><a href="shop.html?category=flats">Flats</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Support</h4>
+          <ul>
+            <li><a href="track.html">Track Order</a></li>
+            <li><a href="contact.html">Shipping & Returns</a></li>
+            <li><a href="#">Size Guide</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 SHOEPHILE. All rights reserved.</p>
+        <p>Crafted with care for the modern woman.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/products.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
