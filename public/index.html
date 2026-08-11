@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="SHOEPHILE — Love Affair with Shoes. Premium women's flats designed for everyday elegance. Elegant, comfortable, stylish flats shipped across Pakistan.">
+  <meta name="keywords" content="women's flats, luxury flats Pakistan, elegant flats, comfortable flats, SHOEPHILE, women's footwear Lahore">
+  <title>SHOEPHILE — Love Affair with Shoes | Premium Women's Flats</title>
+  <meta property="og:title" content="SHOEPHILE — Love Affair with Shoes">
+  <meta property="og:description" content="Premium women's flats. Elegant designs, all-day comfort. Free shipping above PKR 3,000.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="/images/logo.jpg">
+  <link rel="canonical" href="https://shoephile.vercel.app/">
+  <link rel="icon" href="/images/logo.jpg" type="image/jpeg">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <button class="mobile-menu-btn" aria-label="Open menu"><span></span><span></span><span></span></button>
+      <a href="index.html" class="logo" aria-label="SHOEPHILE Home">
+        <img src="images/logo.jpg" alt="SHOEPHILE — Love Affair with Shoes">
+      </a>
+      <nav class="nav-links">
+        <a href="index.html" class="active">Home</a>
+        <a href="shop.html">Shop</a>
+        <a href="shop.html?category=flats">Flats</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+        <a href="faq.html">FAQ</a>
+      </nav>
+      <div class="header-actions">
+        <button class="header-action" data-search-open aria-label="Search">
+          <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        </button>
+        <button class="theme-toggle" aria-label="Toggle theme"></button>
+        <a href="wishlist.html" class="header-action" aria-label="Wishlist">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          <span class="wishlist-count" style="display:none">0</span>
+        </a>
+        <a href="cart.html" class="header-action" aria-label="Shopping bag">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          <span class="cart-count" style="display:none">0</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="mobile-overlay"></div>
+  <nav class="mobile-nav">
+    <button class="mobile-nav-close" aria-label="Close menu">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <div class="mobile-nav-links">
+      <a href="index.html">Home</a>
+      <a href="shop.html">Shop</a>
+      <a href="shop.html?category=flats">Flats</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+      <a href="faq.html">FAQ</a>
+      <a href="track.html">Track Order</a>
+    </div>
+  </nav>
+
+  <div class="search-overlay">
+    <form class="search-form">
+      <div class="search-input-wrap">
+        <input type="search" class="search-input" placeholder="Search flats..." aria-label="Search">
+        <button type="button" class="search-close" aria-label="Close search">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-image">
+      <img src="images/ad9black_0ea25eaa-e8c5-48b1-bfca-66c7f98d929d.webp" alt="SHOEPHILE elegant women's flats" fetchpriority="high">
+    </div>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <p class="section-label" style="color:rgba(255,255,255,0.85);letter-spacing:0.3em;">Premium Women's Flats</p>
+      <h1>Love Affair with Shoes</h1>
+      <p>Elegant, comfortable flats designed for everyday sophistication. Discover the refined collection crafted for the modern woman.</p>
+      <div class="hero-ctas">
+        <a href="shop.html" class="btn btn-primary">Shop Flats</a>
+        <a href="shop.html?category=new" class="btn btn-outline">Explore Collection</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header fade-in">
+        <p class="section-label">Curated</p>
+        <h2 class="section-title">Featured Collection</h2>
+        <p>A selection of our most refined silhouettes — elegance for every step.</p>
+      </div>
+      <div class="product-grid" id="featured-grid"></div>
+    </div>
+  </section>
+
+  <!-- New Arrivals -->
+  <section class="section section-alt">
+    <div class="container">
+      <div class="section-header fade-in">
+        <p class="section-label">Just In</p>
+        <h2 class="section-title">New Arrivals</h2>
+        <p>Fresh designs that celebrate comfort and quiet luxury.</p>
+      </div>
+      <div class="product-grid" id="new-arrivals-grid"></div>
+      <div class="text-center" style="margin-top:2.5rem;">
+        <a href="shop.html?category=new" class="btn btn-outline">View All New Arrivals</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Best Sellers -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header fade-in">
+        <p class="section-label">Most Loved</p>
+        <h2 class="section-title">Best Sellers</h2>
+        <p>The styles our customers return to again and again.</p>
+      </div>
+      <div class="product-grid" id="bestsellers-grid"></div>
+    </div>
+  </section>
+
+  <!-- Why SHOEPHILE -->
+  <section class="section section-alt">
+    <div class="container">
+      <div class="section-header fade-in">
+        <p class="section-label">The Difference</p>
+        <h2 class="section-title">Why SHOEPHILE?</h2>
+      </div>
+      <div class="benefits-grid fade-in" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:2rem;margin-top:2rem;">
+        <div class="benefit-card" style="text-align:center;padding:1.5rem;">
+          <div style="width:48px;height:48px;margin:0 auto 1rem;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--rose);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          </div>
+          <h3 style="font-size:1.15rem;margin-bottom:0.5rem;">Elegant Designs</h3>
+          <p class="text-muted" style="font-size:0.9rem;">Refined silhouettes that elevate everyday wear without sacrificing comfort.</p>
+        </div>
+        <div class="benefit-card" style="text-align:center;padding:1.5rem;">
+          <div style="width:48px;height:48px;margin:0 auto 1rem;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--rose);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </div>
+          <h3 style="font-size:1.15rem;margin-bottom:0.5rem;">Comfortable Flats</h3>
+          <p class="text-muted" style="font-size:0.9rem;">Thoughtfully constructed for all-day wear — style that feels as good as it looks.</p>
+        </div>
+        <div class="benefit-card" style="text-align:center;padding:1.5rem;">
+          <div style="width:48px;height:48px;margin:0 auto 1rem;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--rose);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+          </div>
+          <h3 style="font-size:1.15rem;margin-bottom:0.5rem;">Ready to Ship</h3>
+          <p class="text-muted" style="font-size:0.9rem;">Fast dispatch across Pakistan. Free shipping on orders above PKR 3,000.</p>
+        </div>
+        <div class="benefit-card" style="text-align:center;padding:1.5rem;">
+          <div style="width:48px;height:48px;margin:0 auto 1rem;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--rose);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <h3 style="font-size:1.15rem;margin-bottom:0.5rem;">Premium Experience</h3>
+          <p class="text-muted" style="font-size:0.9rem;">Carefully selected pieces, secure checkout, and thoughtful packaging.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Brand Story -->
+  <section class="section">
+    <div class="container" style="max-width:800px;text-align:center;">
+      <p class="section-label fade-in">Our Story</p>
+      <h2 class="section-title fade-in">SHOEPHILE</h2>
+      <p class="fade-in" style="font-size:1.1rem;line-height:1.85;color:var(--muted);margin-top:1rem;">
+        SHOEPHILE celebrates the love women have for beautiful footwear. We focus exclusively on elegant, comfortable and stylish women's flats — designed for everyday sophistication. From Lahore to your doorstep, every pair is chosen to make you feel refined, confident and at ease.
+      </p>
+      <a href="about.html" class="btn btn-outline fade-in" style="margin-top:2rem;">About Us</a>
+    </div>
+  </section>
+
+  <!-- Reviews -->
+  <section class="section section-alt">
+    <div class="container">
+      <div class="section-header fade-in">
+        <p class="section-label">Kind Words</p>
+        <h2 class="section-title">Customer Reviews</h2>
+      </div>
+      <div id="home-reviews" class="fade-in" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.5rem;margin-top:1.5rem;">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Instagram -->
+  <section class="section">
+    <div class="container text-center fade-in">
+      <p class="section-label">Follow Along</p>
+      <h2 class="section-title">@shoephile.pk</h2>
+      <p style="color:var(--muted);max-width:480px;margin:0.75rem auto 1.5rem;">Style inspiration, new arrivals and behind the scenes. Join our community on Instagram.</p>
+      <a href="https://www.instagram.com/shoephile.pk?igsh=MXFud3YyMHJvN2k4Ng==" target="_blank" rel="noopener" class="btn btn-rose">Follow us on Instagram</a>
+    </div>
+  </section>
+
+  <!-- Newsletter -->
+  <section class="newsletter">
+    <div class="container fade-in">
+      <p class="section-label">Stay in the Circle</p>
+      <h2>Stay in the SHOEPHILE circle</h2>
+      <p>Be the first to discover new arrivals, exclusive offers and special collections.</p>
+      <form class="newsletter-form">
+        <input type="email" placeholder="Your email address" required aria-label="Email">
+        <button type="submit">Subscribe</button>
+      </form>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="logo" aria-label="SHOEPHILE Home">
+            <img src="images/logo.jpg" alt="SHOEPHILE — Love Affair with Shoes">
+          </a>
+          <p>Love Affair with Shoes. Premium women's flats for everyday elegance. Based in Lahore, Pakistan.</p>
+          <div class="social-links" style="margin-top:1.5rem;">
+            <a href="https://www.instagram.com/shoephile.pk?igsh=MXFud3YyMHJvN2k4Ng==" target="_blank" rel="noopener" aria-label="Instagram">
+              <svg class="icon-sm" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="18" cy="6" r="1.5" fill="currentColor" stroke="none"/></svg>
+            </a>
+            <a href="https://www.facebook.com/shoephile.pk?mibextid=ZbWKwL" target="_blank" rel="noopener" aria-label="Facebook">
+              <svg class="icon-sm" viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+            </a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Shop</h4>
+          <ul>
+            <li><a href="shop.html">All Flats</a></li>
+            <li><a href="shop.html?category=new">New Arrivals</a></li>
+            <li><a href="shop.html?category=best">Best Sellers</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="contact.html">Contact</a></li>
+            <li><a href="faq.html">FAQ</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Support</h4>
+          <ul>
+            <li><a href="track.html">Track Order</a></li>
+            <li><a href="shipping-policy.html">Shipping Policy</a></li>
+            <li><a href="returns-policy.html">Return &amp; Exchange</a></li>
+            <li><a href="privacy.html">Privacy Policy</a></li>
+            <li><a href="terms.html">Terms &amp; Conditions</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 SHOEPHILE. All rights reserved.</p>
+        <p>shoephile218@gmail.com · Lahore, Pakistan</p>
+      </div>
+    </div>
+  </footer>
+
+  <div class="newsletter-popup">
+    <div class="popup-content">
+      <button class="popup-close" aria-label="Close">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+      <p class="section-label">Exclusive Access</p>
+      <h3>Stay in the SHOEPHILE circle</h3>
+      <p>Be the first to know about new arrivals and offers.</p>
+      <form class="newsletter-form">
+        <input type="email" placeholder="Your email address" required>
+        <button type="submit">Subscribe</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/products.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    // Load home reviews
+    (async function() {
+      try {
+        const res = await fetch('/api/reviews');
+        const reviews = await res.json();
+        const el = document.getElementById('home-reviews');
+        if (!el) return;
+        if (!Array.isArray(reviews) || !reviews.length) {
+          el.innerHTML = '<p class="text-muted text-center" style="grid-column:1/-1;">Reviews coming soon. Be the first to share your experience.</p>';
+          return;
+        }
+        el.innerHTML = reviews.slice(0, 3).map(r => `
+          <div style="background:var(--white);border:1px solid var(--border);padding:1.5rem;">
+            <div style="color:var(--rose);letter-spacing:2px;margin-bottom:0.5rem;">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
+            <p style="font-size:0.95rem;line-height:1.7;margin-bottom:1rem;">"${r.text.slice(0,180)}${r.text.length>180?'…':''}"</p>
+            <p style="font-size:0.8rem;letter-spacing:0.08em;text-transform:uppercase;">${r.name}${r.verified ? ' · Verified' : ''}</p>
+          </div>
+        `).join('');
+      } catch(e) {}
+    })();
+  </script>
+</body>
+</html>

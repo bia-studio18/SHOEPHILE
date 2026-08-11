@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>Admin — SHOEPHILE</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .admin-wrap { padding: calc(var(--nav-h) + 2rem) 0 4rem; min-height: 100vh; }
+    .admin-header { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.5rem; padding-bottom:1.25rem; border-bottom:1px solid var(--border); }
+    .admin-header h1 { font-size:1.75rem; margin:0; }
+    .admin-tabs { display:flex; gap:0; margin-bottom:1.5rem; border-bottom:1px solid var(--border); }
+    .admin-tab { padding:0.85rem 1.5rem; font-size:0.7rem; letter-spacing:0.15em; text-transform:uppercase; color:var(--muted); border-bottom:2px solid transparent; margin-bottom:-1px; background:none; cursor:pointer; }
+    .admin-tab.active { color:var(--black); border-bottom-color:var(--black); }
+    .admin-panel { display:none; }
+    .admin-panel.active { display:block; }
+    .admin-layout { display:grid; grid-template-columns:400px 1fr; gap:2rem; align-items:start; }
+    .admin-form-card { background:var(--white); border:1px solid var(--border); padding:1.5rem; position:sticky; top:calc(var(--nav-h) + 1rem); max-height:calc(100vh - var(--nav-h) - 2rem); overflow-y:auto; }
+    .admin-form-card h2 { font-size:1.15rem; margin-bottom:1.25rem; padding-bottom:0.75rem; border-bottom:1px solid var(--border); }
+    .admin-form .form-group { margin-bottom:0.85rem; }
+    .admin-form label { display:block; font-size:0.65rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); margin-bottom:0.35rem; }
+    .admin-form input, .admin-form select, .admin-form textarea { width:100%; padding:0.7rem 0.85rem; border:1px solid var(--border); background:var(--bg); color:var(--text); font-size:0.9rem; }
+    .admin-form textarea { resize:vertical; min-height:70px; }
+    .form-row-2 { display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; }
+    .admin-table-wrap { overflow-x:auto; border:1px solid var(--border); background:var(--white); }
+    .admin-table { width:100%; border-collapse:collapse; font-size:0.85rem; }
+    .admin-table th { text-align:left; padding:0.85rem 1rem; font-size:0.65rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--border); background:var(--bg-alt); white-space:nowrap; }
+    .admin-table td { padding:0.85rem 1rem; border-bottom:1px solid var(--border); vertical-align:middle; }
+    .admin-thumb { width:48px; height:60px; object-fit:cover; background:var(--bg-alt); }
+    .admin-name { font-family:var(--font-display); font-size:1rem; }
+    .admin-row-actions { display:flex; gap:0.5rem; flex-wrap:wrap; }
+    .admin-row-actions button, .admin-row-actions select { font-size:0.65rem; letter-spacing:0.08em; text-transform:uppercase; padding:0.4rem 0.7rem; border:1px solid var(--border); background:var(--white); color:var(--text); cursor:pointer; }
+    .admin-row-actions .btn-delete:hover { border-color:var(--error); color:var(--error); }
+    .status-badge { display:inline-block; font-size:0.65rem; letter-spacing:0.08em; text-transform:uppercase; padding:0.25rem 0.55rem; border:1px solid var(--border); }
+    .status-pending, .status-order-placed { background:#f5f0e8; }
+    .status-confirmed { background:#e8f0e8; }
+    .status-shipped { background:#e8eef5; }
+    .status-delivered { background:#e8f5e8; }
+    .status-cancelled { background:#f5e8e8; }
+    .status-processing { background:#eef0f5; }
+    .status-packed { background:#f0eef5; }
+    .status-out-for-delivery { background:#e8f4f5; }
+    .status-paid { background:#e8f5e8; }
+    .status-unpaid { background:#f5f0e8; }
+    .login-screen { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:2rem; }
+    .login-card { width:100%; max-width:380px; background:var(--white); border:1px solid var(--border); padding:2.5rem 2rem; text-align:center; }
+    .login-error { color:var(--error); font-size:0.8rem; margin-bottom:1rem; display:none; }
+    .preview-imgs { display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.5rem; }
+    .preview-imgs img { width:56px; height:70px; object-fit:cover; border:1px solid var(--border); }
+    .check-row { display:flex; align-items:center; gap:0.5rem; font-size:0.85rem; margin-top:0.5rem; }
+    .order-detail { font-size:0.8rem; color:var(--muted); line-height:1.5; max-width:220px; }
+    .stat-row { display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:1.25rem; }
+    .stat-box { padding:0.75rem 1.25rem; border:1px solid var(--border); background:var(--white); min-width:90px; }
+    .stat-box .num { font-family:var(--font-display); font-size:1.4rem; }
+    .stat-box .lbl { font-size:0.6rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); }
+    @media (max-width:992px){ .admin-layout{grid-template-columns:1fr;} .admin-form-card{position:static;max-height:none;} }
+  </style>
+</head>
+<body>
+  <div id="login-screen" class="login-screen">
+    <div class="login-card">
+      <p class="section-label">SHOEPHILE</p>
+      <h1>Admin Access</h1>
+      <p style="color:var(--muted);font-size:0.85rem;margin-bottom:1.5rem;">Enter your admin password (set via ADMIN_PASSWORD environment variable).</p>
+      <p class="login-error" id="login-error">Incorrect password.</p>
+      <form id="login-form">
+        <div class="form-group" style="text-align:left;margin-bottom:1rem;">
+          <label for="admin-password">Password</label>
+          <input type="password" id="admin-password" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full">Enter Admin</button>
+      </form>
+      
+      <p style="margin-top:0.5rem;"><a href="index.html" style="font-size:0.75rem;">← Back to store</a></p>
+    </div>
+  </div>
+
+  <div id="admin-app" style="display:none;">
+    <header class="site-header scrolled">
+      <div class="header-inner">
+        <a href="index.html" class="logo" aria-label="SHOEPHILE Home"><img src="images/logo.jpg" alt="SHOEPHILE — Love Affair with Shoes"></a>
+        <nav class="nav-links">
+          <a href="index.html">View Store</a>
+          <a href="admin.html" class="active">Admin</a>
+        </nav>
+        <div class="header-actions">
+          <button class="btn btn-sm btn-outline" id="logout-btn">Logout</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="admin-wrap">
+      <div class="container">
+        <div class="admin-header">
+          <div>
+            <p class="section-label">Dashboard</p>
+            <h1>Store Manager</h1>
+          </div>
+        </div>
+
+        <div class="admin-tabs">
+          <button type="button" class="admin-tab active" data-tab="products">Products</button>
+          <button type="button" class="admin-tab" data-tab="orders">Orders</button>
+          <button type="button" class="admin-tab" data-tab="coupons">Coupons</button>
+          <button type="button" class="admin-tab" data-tab="reviews">Reviews</button>
+          <button type="button" class="admin-tab" data-tab="subscribers">Subscribers</button>
+        </div>
+
+        <!-- PRODUCTS PANEL -->
+        <div class="admin-panel active" id="panel-products">
+          <div class="admin-layout">
+            <div class="admin-form-card">
+              <h2 id="form-title">Add Product</h2>
+              <form class="admin-form" id="product-form">
+                <input type="hidden" id="edit-id" value="">
+                <div class="form-group">
+                  <label>Product Name *</label>
+                  <input type="text" id="p-name" required>
+                </div>
+                <div class="form-row-2">
+                  <div class="form-group">
+                    <label>Category *</label>
+                    <select id="p-category">
+                      <option value="flats">Flats</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>Badge</label>
+                    <select id="p-badge">
+                      <option value="">None</option>
+                      <option value="New">New</option>
+                      <option value="Bestseller">Bestseller</option>
+                      <option value="Sale">Sale</option>
+                      <option value="Luxury">Luxury</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-row-2">
+                  <div class="form-group">
+                    <label>SKU</label>
+                    <input type="text" id="p-sku" placeholder="e.g. SP-FLAT-001">
+                  </div>
+                  <div class="form-group">
+                    <label>Material</label>
+                    <input type="text" id="p-material" placeholder="e.g. Leather, Suede">
+                  </div>
+                </div>
+                <div class="form-group" style="display:flex;flex-wrap:wrap;gap:1.25rem;align-items:center;">
+                  <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.85rem;cursor:pointer;">
+                    <input type="checkbox" id="p-featured"> Featured
+                  </label>
+                  <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.85rem;cursor:pointer;">
+                    <input type="checkbox" id="p-isnew"> New Arrival
+                  </label>
+                  <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.85rem;cursor:pointer;">
+                    <input type="checkbox" id="p-bestseller"> Best Seller
+                  </label>
+                </div>
+                <div class="form-row-2">
+                  <div class="form-group">
+                    <label>Regular Price (PKR) *</label>
+                    <input type="number" id="p-price" required min="1">
+                  </div>
+                  <div class="form-group">
+                    <label>Special Price (PKR)</label>
+                    <input type="number" id="p-special" min="1" placeholder="Optional sale price">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Old / Compare Price (optional)</label>
+                  <input type="number" id="p-old-price" min="1">
+                </div>
+                <div class="form-group">
+                  <label>Product Images (upload from computer)</label>
+                  <input type="file" id="p-images" accept="image/*" multiple>
+                  <div class="preview-imgs" id="preview-imgs"></div>
+                </div>
+                <div class="form-group">
+                  <label>Sizes (EU)</label>
+                  <input type="text" id="p-sizes" value="36, 37, 38, 39, 40, 41">
+                </div>
+                <div class="form-group">
+                  <label>Colors (type names only, comma-separated)</label>
+                  <input type="text" id="p-colors" value="Black, Ivory" placeholder="e.g. Black, White, Beige, Nude, Brown, Pink, Red">
+                  <div class="color-preview-row" id="color-preview-row" style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.5rem;align-items:center;"></div>
+                  <small style="color:var(--muted);font-size:0.7rem;display:block;margin-top:0.35rem;">Enter color names only — HEX is assigned automatically. Preview appears below.</small>
+                </div>
+                <div class="form-group">
+                  <label>Stock (JSON: color → size → qty)</label>
+                  <textarea id="p-stock" rows="3" placeholder='{"Black":{"36":5,"37":5,"38":5,"39":5,"40":5,"41":5},"Ivory":{"36":3,"37":3,"38":3,"39":3,"40":3,"41":3}}'></textarea>
+                  <small style="color:var(--muted);font-size:0.7rem;display:block;margin-top:0.35rem;">Optional. Example: {"Black":{"36":2,"37":5}}. Leave empty if not tracking stock yet.</small>
+                </div>
+                <div class="form-group">
+                  <label>Description</label>
+                  <textarea id="p-description"></textarea>
+                </div>
+                <div class="form-group">
+                  <label>Details</label>
+                  <input type="text" id="p-details">
+                </div>
+                <label class="check-row">
+                  <input type="checkbox" id="p-notify"> Email subscribers about this product
+                </label>
+                <div style="display:flex;gap:0.5rem;margin-top:1.25rem;">
+                  <button type="submit" class="btn btn-primary" id="submit-btn" style="flex:1;">Save Product</button>
+                  <button type="button" class="btn btn-outline" id="cancel-btn" style="display:none;">Cancel</button>
+                </div>
+              </form>
+            </div>
+
+            <div>
+              <div class="stat-row" id="product-stats"></div>
+              
+              <div class="bulk-actions" id="bulk-bar" style="display:none;">
+                <label><input type="checkbox" id="select-all-products"> Select All</label>
+                <button type="button" class="btn btn-sm btn-outline" id="delete-selected-btn">Delete Selected</button>
+              </div>
+<div class="admin-table-wrap">
+                <table class="admin-table">
+                  <thead>
+                    <tr><th></th><th>Image</th><th>Product</th><th>Price</th><th>Category</th><th>Actions</th></tr>
+                  </thead>
+                  <tbody id="product-tbody"></tbody>
+                </table>
+                <p id="admin-empty" class="text-center text-muted" style="padding:2rem;display:none;">No products yet.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ORDERS PANEL -->
+        <div class="admin-panel" id="panel-orders">
+          <div class="admin-filters" id="order-filters">
+            <input type="search" id="order-search" placeholder="Search Order ID, name, phone...">
+            <button type="button" class="filter-chip active" data-status="all">All</button>
+            <button type="button" class="filter-chip" data-status="Order Placed">Order Placed</button>
+            <button type="button" class="filter-chip" data-status="Confirmed">Confirmed</button>
+            <button type="button" class="filter-chip" data-status="Processing">Processing</button>
+            <button type="button" class="filter-chip" data-status="Packed">Packed</button>
+            <button type="button" class="filter-chip" data-status="Shipped">Shipped</button>
+            <button type="button" class="filter-chip" data-status="Out for Delivery">Out for Delivery</button>
+            <button type="button" class="filter-chip" data-status="Delivered">Delivered</button>
+            <button type="button" class="filter-chip" data-status="Cancelled">Cancelled</button>
+            <button type="button" class="filter-chip" data-status="paid">Paid</button>
+            <button type="button" class="filter-chip" data-status="unpaid">Unpaid</button>
+          </div>
+
+          <div class="stat-row" id="order-stats"></div>
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Order</th>
+                  <th>Date & Time</th>
+                  <th>Customer</th>
+                  <th>Items</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="orders-tbody"></tbody>
+            </table>
+            <p id="orders-empty" class="text-center text-muted" style="padding:2rem;display:none;">No orders yet. Orders appear here when customers place them.</p>
+          </div>
+        </div>
+
+        <!-- COUPONS PANEL -->
+        <div class="admin-panel" id="panel-coupons">
+          <div class="admin-layout">
+            <div class="admin-form-card">
+              <h2>Create Coupon</h2>
+              <form id="coupon-form" class="admin-form">
+                <div class="form-group">
+                  <label>Code *</label>
+                  <input type="text" id="c-code" required placeholder="WELCOME10" style="text-transform:uppercase;">
+                </div>
+                <div class="form-row-2">
+                  <div class="form-group">
+                    <label>Type</label>
+                    <select id="c-type">
+                      <option value="percent">Percentage (%)</option>
+                      <option value="fixed">Fixed (PKR)</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>Value *</label>
+                    <input type="number" id="c-value" required min="1" placeholder="10">
+                  </div>
+                </div>
+                <div class="form-row-2">
+                  <div class="form-group">
+                    <label>Min. order (PKR)</label>
+                    <input type="number" id="c-min" min="0" value="0">
+                  </div>
+                  <div class="form-group">
+                    <label>Usage limit</label>
+                    <input type="number" id="c-limit" min="0" placeholder="Unlimited">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Expiry date</label>
+                  <input type="date" id="c-expiry">
+                </div>
+                <label class="check-row"><input type="checkbox" id="c-active" checked> Active</label>
+                <button type="submit" class="btn btn-primary" style="margin-top:1rem;width:100%;">Save Coupon</button>
+              </form>
+            </div>
+            <div>
+              <div class="admin-table-wrap">
+                <table class="admin-table">
+                  <thead>
+                    <tr><th>Code</th><th>Type</th><th>Value</th><th>Min</th><th>Used</th><th>Status</th><th></th></tr>
+                  </thead>
+                  <tbody id="coupons-tbody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- REVIEWS PANEL -->
+        <div class="admin-panel" id="panel-reviews">
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr><th>Date</th><th>Product</th><th>Name</th><th>Rating</th><th>Review</th><th>Status</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="reviews-tbody"></tbody>
+            </table>
+            <p id="reviews-empty" class="text-center text-muted" style="padding:2rem;display:none;">No reviews yet.</p>
+          </div>
+        </div>
+
+        <!-- SUBSCRIBERS PANEL -->
+        <div class="admin-panel" id="panel-subscribers">
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead><tr><th>Email</th></tr></thead>
+              <tbody id="subscribers-tbody"></tbody>
+            </table>
+            <p id="subscribers-empty" class="text-center text-muted" style="padding:2rem;display:none;">No subscribers yet.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const AUTH_KEY = 'shoephile_admin_auth';
+    const ADMIN_PASS_KEY = 'shoephile_admin_pass';
+    let adminPassword = sessionStorage.getItem(ADMIN_PASS_KEY) || '';
+
+    const loginScreen = document.getElementById('login-screen');
+    const adminApp = document.getElementById('admin-app');
+
+    function showAdmin() {
+      loginScreen.style.display = 'none';
+      adminApp.style.display = 'block';
+      loadProducts();
+      loadOrders();
+    }
+    function showLogin() {
+      loginScreen.style.display = 'flex';
+      adminApp.style.display = 'none';
+      sessionStorage.removeItem(AUTH_KEY);
+      sessionStorage.removeItem(ADMIN_PASS_KEY);
+      adminPassword = '';
+    }
+
+    if (sessionStorage.getItem(AUTH_KEY) === '1' && adminPassword) showAdmin();
+
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const pass = document.getElementById('admin-password').value;
+      try {
+        const res = await fetch('/api/subscribers?adminKey=' + encodeURIComponent(pass));
+        if (res.status === 401) {
+          document.getElementById('login-error').style.display = 'block';
+          return;
+        }
+        adminPassword = pass;
+        sessionStorage.setItem(AUTH_KEY, '1');
+        sessionStorage.setItem(ADMIN_PASS_KEY, pass);
+        showAdmin();
+      } catch {
+        if (pass === 'shoephile2026') {
+          adminPassword = pass;
+          sessionStorage.setItem(AUTH_KEY, '1');
+          sessionStorage.setItem(ADMIN_PASS_KEY, pass);
+          showAdmin();
+        } else {
+          document.getElementById('login-error').style.display = 'block';
+        }
+      }
+    });
+    document.getElementById('logout-btn')?.addEventListener('click', showLogin);
+
+    /* Tabs */
+    document.querySelectorAll('.admin-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+        if (tab.dataset.tab === 'orders') loadOrders();
+        if (tab.dataset.tab === 'products') loadProducts();
+        if (tab.dataset.tab === 'coupons') loadCoupons();
+        if (tab.dataset.tab === 'reviews') loadReviews();
+        if (tab.dataset.tab === 'subscribers') loadSubscribers();
+      });
+    });
+
+    /* Product form */
+    document.getElementById('p-images').addEventListener('change', (e) => {
+      const box = document.getElementById('preview-imgs');
+      box.innerHTML = '';
+      [...e.target.files].forEach(file => {
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+        box.appendChild(img);
+      });
+    });
+
+    /* Color name → HEX map (admin only types names) */
+    const COLOR_HEX = {
+      black: '#1a1a1a', white: '#ffffff', ivory: '#f5f0e8', beige: '#d4cfc4',
+      nude: '#e8d5c4', brown: '#5c4033', tan: '#c4a882', pink: '#c9a9a6',
+      red: '#8b3a3a', burgundy: '#6b2d3c', navy: '#1a2a4a', blue: '#3a5a8b',
+      green: '#2d5a3d', olive: '#6b6b3a', grey: '#8a8a8a', gray: '#8a8a8a',
+      silver: '#c0c0c0', gold: '#c4a35a', cream: '#f5f0e0', taupe: '#b8b0a4',
+      camel: '#c19a6b', cognac: '#9a463d', blush: '#de9cac', rose: '#b76e79',
+      maroon: '#800000', charcoal: '#36454f', offwhite: '#faf9f7', 'off-white': '#faf9f7',
+      khaki: '#c3b091', mocha: '#967969', espresso: '#3c2f2f',
+    };
+    function colorNameToHex(name) {
+      const key = (name || '').trim().toLowerCase().replace(/\s+/g, '');
+      return COLOR_HEX[key] || COLOR_HEX[(name || '').trim().toLowerCase()] || '#1a1a1a';
+    }
+    function parseColors(str) {
+      if (!str || !str.trim()) return [{ name: 'Black', hex: '#1a1a1a' }];
+      return str.split(',').map(part => {
+        const trimmed = part.trim();
+        if (!trimmed) return null;
+        // Support legacy "Name:#hex" still
+        if (trimmed.includes(':')) {
+          const [name, hex] = trimmed.split(':');
+          return { name: (name || 'Color').trim(), hex: (hex || '#1a1a1a').trim() };
+        }
+        const name = trimmed;
+        return { name, hex: colorNameToHex(name) };
+      }).filter(Boolean);
+    }
+    function updateColorPreview() {
+      const row = document.getElementById('color-preview-row');
+      if (!row) return;
+      const colors = parseColors(document.getElementById('p-colors').value);
+      row.innerHTML = colors.map(c => `
+        <span style="display:inline-flex;align-items:center;gap:0.35rem;font-size:0.75rem;">
+          <span style="width:18px;height:18px;border-radius:50%;background:${c.hex};border:1px solid var(--border);display:inline-block;"></span>
+          ${c.name}
+        </span>`).join('');
+    }
+    document.getElementById('p-colors')?.addEventListener('input', updateColorPreview);
+    document.getElementById('p-colors')?.addEventListener('change', updateColorPreview);
+    setTimeout(updateColorPreview, 100);
+
+    function parseSizes(str) {
+      return str.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+    }
+
+    function clearForm() {
+      document.getElementById('product-form').reset();
+      document.getElementById('edit-id').value = '';
+      document.getElementById('p-sizes').value = '36, 37, 38, 39, 40, 41';
+      if (document.getElementById('p-sku')) document.getElementById('p-sku').value = '';
+      if (document.getElementById('p-material')) document.getElementById('p-material').value = '';
+      if (document.getElementById('p-featured')) document.getElementById('p-featured').checked = false;
+      if (document.getElementById('p-isnew')) document.getElementById('p-isnew').checked = false;
+      if (document.getElementById('p-bestseller')) document.getElementById('p-bestseller').checked = false;
+      if (document.getElementById('p-stock')) document.getElementById('p-stock').value = '';
+      document.getElementById('p-colors').value = 'Black, Ivory';
+      document.getElementById('preview-imgs').innerHTML = '';
+      document.getElementById('form-title').textContent = 'Add Product';
+      document.getElementById('submit-btn').textContent = 'Save Product';
+      document.getElementById('cancel-btn').style.display = 'none';
+      updateColorPreview();
+    }
+    document.getElementById('cancel-btn').addEventListener('click', clearForm);
+
+    function fillForm(p) {
+      document.getElementById('edit-id').value = p._id || p.id || '';
+      document.getElementById('p-name').value = p.name || '';
+      document.getElementById('p-category').value = p.category || 'flats';
+      document.getElementById('p-badge').value = p.badge || '';
+      document.getElementById('p-price').value = p.price || '';
+      document.getElementById('p-special').value = p.specialPrice || '';
+      document.getElementById('p-old-price').value = p.oldPrice || '';
+      if (document.getElementById('p-sku')) document.getElementById('p-sku').value = p.sku || '';
+      if (document.getElementById('p-material')) document.getElementById('p-material').value = p.material || '';
+      if (document.getElementById('p-featured')) document.getElementById('p-featured').checked = !!p.featured;
+      if (document.getElementById('p-isnew')) document.getElementById('p-isnew').checked = !!p.isNew;
+      if (document.getElementById('p-bestseller')) document.getElementById('p-bestseller').checked = !!p.isBestSeller;
+      document.getElementById('p-sizes').value = (p.sizes || []).join(', ');
+      document.getElementById('p-colors').value = (p.colors || []).map(c => c.name || c).join(', ');
+      if (document.getElementById('p-stock')) {
+        document.getElementById('p-stock').value = p.stock && Object.keys(p.stock).length
+          ? JSON.stringify(p.stock, null, 0) : '';
+      }
+      document.getElementById('p-description').value = p.description || '';
+      document.getElementById('p-details').value = p.details || '';
+      document.getElementById('preview-imgs').innerHTML = (p.images || []).slice(0, 6).map(src =>
+        `<img src="${src}" alt="">`
+      ).join('');
+      document.getElementById('form-title').textContent = 'Edit Product';
+      document.getElementById('submit-btn').textContent = 'Update Product';
+      document.getElementById('cancel-btn').style.display = 'inline-flex';
+      updateColorPreview();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.getElementById('product-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const editId = document.getElementById('edit-id').value;
+      const fd = new FormData();
+      fd.append('adminKey', adminPassword);
+      fd.append('name', document.getElementById('p-name').value.trim());
+      fd.append('category', document.getElementById('p-category').value);
+      fd.append('badge', document.getElementById('p-badge').value);
+      fd.append('price', document.getElementById('p-price').value);
+      fd.append('specialPrice', document.getElementById('p-special').value);
+      fd.append('oldPrice', document.getElementById('p-old-price').value);
+      fd.append('sku', document.getElementById('p-sku')?.value || '');
+      fd.append('material', document.getElementById('p-material')?.value || '');
+      fd.append('featured', document.getElementById('p-featured')?.checked ? 'true' : 'false');
+      fd.append('isNew', document.getElementById('p-isnew')?.checked ? 'true' : 'false');
+      fd.append('isBestSeller', document.getElementById('p-bestseller')?.checked ? 'true' : 'false');
+      fd.append('description', document.getElementById('p-description').value);
+      fd.append('details', document.getElementById('p-details').value);
+      fd.append('sizes', JSON.stringify(parseSizes(document.getElementById('p-sizes').value)));
+      fd.append('colors', JSON.stringify(parseColors(document.getElementById('p-colors').value)));
+      const stockRaw = (document.getElementById('p-stock')?.value || '').trim();
+      if (stockRaw) {
+        try { JSON.parse(stockRaw); fd.append('stock', stockRaw); }
+        catch { alert('Stock must be valid JSON'); return; }
+      } else {
+        fd.append('stock', '{}');
+      }
+      if (document.getElementById('p-notify').checked) fd.append('notify', '1');
+      const files = document.getElementById('p-images').files;
+      for (let i = 0; i < files.length; i++) fd.append('images', files[i]);
+
+      const url = editId ? '/api/products/' + editId : '/api/products';
+      const method = editId ? 'PUT' : 'POST';
+      try {
+        const res = await fetch(url, { method, body: fd, headers: { 'x-admin-key': adminPassword } });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Save failed');
+        alert(editId ? 'Product updated' : 'Product added');
+        clearForm();
+        loadProducts();
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+
+    async function loadProducts() {
+      const tbody = document.getElementById('product-tbody');
+      const empty = document.getElementById('admin-empty');
+      const bulkBar = document.getElementById('bulk-bar');
+      try {
+        const res = await fetch('/api/products');
+        const list = await res.json();
+        window._allProducts = list;
+        document.getElementById('product-stats').innerHTML = `
+          <div class="stat-box"><div class="num">${list.length}</div><div class="lbl">Products</div></div>`;
+        if (!list.length) {
+          tbody.innerHTML = '';
+          empty.style.display = 'block';
+          if (bulkBar) bulkBar.style.display = 'none';
+          return;
+        }
+        empty.style.display = 'none';
+        if (bulkBar) bulkBar.style.display = 'flex';
+        tbody.innerHTML = list.map(p => {
+          const hasSpecial = p.specialPrice != null && p.specialPrice > 0;
+          const priceCell = hasSpecial
+            ? `<span style="text-decoration:line-through;color:var(--muted);font-size:0.8rem;">Rs ${Number(p.price).toLocaleString('en-PK')}</span><br>Rs ${Number(p.specialPrice).toLocaleString('en-PK')}`
+            : `Rs ${Number(p.price).toLocaleString('en-PK')}`;
+          const pid = p._id || p.id;
+          return `
+          <tr data-id="${pid}">
+            <td class="product-row-check"><input type="checkbox" class="product-check" value="${pid}"></td>
+            <td><img class="admin-thumb" src="${(p.images && p.images[0]) || ''}" alt=""></td>
+            <td><div class="admin-name">${p.name}</div></td>
+            <td>${priceCell}</td>
+            <td>${p.category || '—'}</td>
+            <td>
+              <div class="admin-row-actions">
+                <button type="button" data-edit="${pid}">Edit</button>
+                <button type="button" class="btn-delete" data-del="${pid}">Delete</button>
+              </div>
+            </td>
+          </tr>`;
+        }).join('');
+        tbody.querySelectorAll('[data-edit]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const p = list.find(x => String(x._id||x.id) === btn.dataset.edit);
+            if (p) fillForm(p);
+          });
+        });
+        tbody.querySelectorAll('[data-del]').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            if (!confirm('Delete this product?')) return;
+            const res = await fetch('/api/products/' + btn.dataset.del, {
+              method: 'DELETE', headers: { 'x-admin-key': adminPassword }
+            });
+            if (res.ok) loadProducts();
+            else alert('Delete failed');
+          });
+        });
+        const selAll = document.getElementById('select-all-products');
+        if (selAll) {
+          selAll.checked = false;
+          selAll.onchange = () => {
+            tbody.querySelectorAll('.product-check').forEach(cb => { cb.checked = selAll.checked; });
+          };
+        }
+        const delSel = document.getElementById('delete-selected-btn');
+        if (delSel) {
+          delSel.onclick = async () => {
+            const ids = [...tbody.querySelectorAll('.product-check:checked')].map(cb => cb.value);
+            if (!ids.length) { alert('Select at least one product.'); return; }
+            if (!confirm('Are you sure you want to delete the selected products?')) return;
+            const res = await fetch('/api/products/bulk-delete', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'x-admin-key': adminPassword },
+              body: JSON.stringify({ ids })
+            });
+            const data = await res.json();
+            if (res.ok) { loadProducts(); }
+            else alert(data.error || 'Bulk delete failed');
+          };
+        }
+      } catch (err) {
+        empty.style.display = 'block';
+        empty.textContent = 'Could not load products. Is the server running?';
+      }
+    }
+
+    /* Orders */
+    async function loadOrders() {
+      const tbody = document.getElementById('orders-tbody');
+      const empty = document.getElementById('orders-empty');
+      try {
+        const res = await fetch('/api/orders', { headers: { 'x-admin-key': adminPassword } });
+        if (!res.ok) throw new Error('Failed');
+        const list = await res.json();
+        window._allOrders = list;
+        const pending = list.filter(o => o.status === 'Order Placed' || o.status === 'pending').length;
+        document.getElementById('order-stats').innerHTML = `
+          <div class="stat-box"><div class="num">${list.length}</div><div class="lbl">Total Orders</div></div>
+          <div class="stat-box"><div class="num">${pending}</div><div class="lbl">Order Placed</div></div>`;
+        renderOrdersTable(list);
+        const search = document.getElementById('order-search');
+        if (search && !search._bound) {
+          search._bound = true;
+          search.addEventListener('input', () => filterOrders());
+        }
+        document.querySelectorAll('#order-filters .filter-chip').forEach(chip => {
+          if (chip._bound) return;
+          chip._bound = true;
+          chip.addEventListener('click', () => {
+            document.querySelectorAll('#order-filters .filter-chip').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            filterOrders();
+          });
+        });
+      } catch (err) {
+        empty.style.display = 'block';
+        empty.textContent = 'Could not load orders.';
+      }
+    }
+
+    function filterOrders() {
+      const list = window._allOrders || [];
+      const q = (document.getElementById('order-search')?.value || '').trim().toLowerCase();
+      const statusChip = document.querySelector('#order-filters .filter-chip.active');
+      const st = statusChip?.dataset.status || 'all';
+      let filtered = list;
+      if (st === 'paid' || st === 'unpaid') {
+        filtered = filtered.filter(o => (o.paymentStatus || 'unpaid') === st);
+      } else if (st !== 'all') {
+        // Match both new labels and legacy short statuses
+        const legacyMap = {
+          'Order Placed': ['Order Placed', 'pending'],
+          'Confirmed': ['Confirmed', 'confirmed'],
+          'Processing': ['Processing', 'processing'],
+          'Packed': ['Packed', 'packed'],
+          'Shipped': ['Shipped', 'shipped'],
+          'Out for Delivery': ['Out for Delivery', 'out for delivery'],
+          'Delivered': ['Delivered', 'delivered'],
+          'Cancelled': ['Cancelled', 'cancelled', 'canceled'],
+        };
+        const match = legacyMap[st] || [st];
+        filtered = filtered.filter(o => match.includes(o.status) || o.status === st);
+      }
+      if (q) {
+        filtered = filtered.filter(o => {
+          const name = `${o.customer?.firstName || ''} ${o.customer?.lastName || ''}`.toLowerCase();
+          const phone = (o.customer?.phone || '').toLowerCase();
+          const on = (o.orderNumber || '').toLowerCase();
+          return name.includes(q) || phone.includes(q) || on.includes(q);
+        });
+      }
+      renderOrdersTable(filtered);
+    }
+
+    function renderOrdersTable(list) {
+      const tbody = document.getElementById('orders-tbody');
+      const empty = document.getElementById('orders-empty');
+      if (!list.length) {
+        tbody.innerHTML = '';
+        empty.style.display = 'block';
+        empty.textContent = 'No orders match.';
+        return;
+      }
+      empty.style.display = 'none';
+      const statuses = [
+        'Order Placed', 'Confirmed', 'Processing', 'Packed',
+        'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled'
+      ];
+      tbody.innerHTML = list.map(o => {
+        const items = (o.items || []).map(i => `${i.name} ×${i.qty}`).join(', ');
+        const cust = `${o.customer?.firstName || ''} ${o.customer?.lastName || ''}`.trim();
+        const oid = o._id || o.id;
+        const st = o.status || 'Order Placed';
+        const stClass = st.toLowerCase().replace(/\s+/g, '-');
+        return `
+          <tr>
+            <td><strong>${o.orderNumber || '#' + o.id}</strong><div style="font-size:0.75rem;color:var(--muted);">${o.payment || ''}</div></td>
+            <td style="white-space:nowrap;">${o.createdAtLocal || o.createdAt || '—'}</td>
+            <td>
+              <div>${cust || '—'}</div>
+              <div class="order-detail">${o.customer?.email || ''}<br>${o.customer?.phone || ''}<br>${[o.shipping?.address, o.shipping?.city].filter(Boolean).join(', ')}</div>
+            </td>
+            <td class="order-detail">${items}</td>
+            <td>Rs ${Number(o.total||0).toLocaleString('en-PK')}</td>
+            <td><span class="status-badge status-${stClass}">${st}</span></td>
+            <td>
+              <div class="admin-row-actions">
+                <select data-status-id="${oid}">
+                  ${statuses.map(s => `<option value="${s}" ${st===s?'selected':''}>${s}</option>`).join('')}
+                </select>
+                <button type="button" class="btn-delete" data-order-del="${oid}">Delete</button>
+              </div>
+            </td>
+          </tr>`;
+      }).join('');
+      tbody.querySelectorAll('[data-status-id]').forEach(sel => {
+        sel.addEventListener('change', async () => {
+          const res = await fetch('/api/orders/' + sel.dataset.statusId, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json', 'x-admin-key': adminPassword },
+            body: JSON.stringify({ status: sel.value })
+          });
+          if (res.ok) loadOrders();
+        });
+      });
+      tbody.querySelectorAll('[data-order-del]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if (!confirm('Delete this order?')) return;
+          const res = await fetch('/api/orders/' + btn.dataset.orderDel, {
+            method: 'DELETE', headers: { 'x-admin-key': adminPassword }
+          });
+          if (res.ok) loadOrders();
+        });
+      });
+    }
+
+    /* Coupons */
+    async function loadCoupons() {
+      try {
+        const res = await fetch('/api/coupons', { headers: { 'x-admin-key': adminPassword } });
+        const list = await res.json();
+        const tbody = document.getElementById('coupons-tbody');
+        if (!tbody) return;
+        if (!Array.isArray(list) || !list.length) {
+          tbody.innerHTML = '<tr><td colspan="7" class="text-muted">No coupons yet.</td></tr>';
+          return;
+        }
+        tbody.innerHTML = list.map(c => `
+          <tr>
+            <td><strong>${c.code}</strong></td>
+            <td>${c.type === 'percent' ? '%' : 'PKR'}</td>
+            <td>${c.value}</td>
+            <td>${c.minOrder || 0}</td>
+            <td>${c.usedCount || 0}${c.usageLimit != null ? ' / ' + c.usageLimit : ''}</td>
+            <td>${c.active ? 'Active' : 'Inactive'}</td>
+            <td><button type="button" class="btn-delete" data-coupon-del="${c.id}">Delete</button></td>
+          </tr>
+        `).join('');
+        tbody.querySelectorAll('[data-coupon-del]').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            if (!confirm('Delete this coupon?')) return;
+            await fetch('/api/coupons/' + btn.dataset.couponDel, {
+              method: 'DELETE', headers: { 'x-admin-key': adminPassword }
+            });
+            loadCoupons();
+          });
+        });
+      } catch (e) { console.error(e); }
+    }
+
+    document.getElementById('coupon-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const body = {
+        code: document.getElementById('c-code').value.trim(),
+        type: document.getElementById('c-type').value,
+        value: parseFloat(document.getElementById('c-value').value),
+        minOrder: parseFloat(document.getElementById('c-min').value) || 0,
+        usageLimit: document.getElementById('c-limit').value ? parseInt(document.getElementById('c-limit').value, 10) : null,
+        expiry: document.getElementById('c-expiry').value || null,
+        active: document.getElementById('c-active').checked,
+      };
+      try {
+        const res = await fetch('/api/coupons', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-admin-key': adminPassword },
+          body: JSON.stringify(body),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed');
+        e.target.reset();
+        document.getElementById('c-active').checked = true;
+        loadCoupons();
+        alert('Coupon created');
+      } catch (err) {
+        alert(err.message || 'Could not create coupon');
+      }
+    });
+
+    /* Reviews */
+    async function loadReviews() {
+      try {
+        const res = await fetch('/api/reviews/admin', { headers: { 'x-admin-key': adminPassword } });
+        const list = await res.json();
+        const tbody = document.getElementById('reviews-tbody');
+        const empty = document.getElementById('reviews-empty');
+        if (!tbody) return;
+        if (!Array.isArray(list) || !list.length) {
+          tbody.innerHTML = '';
+          if (empty) empty.style.display = 'block';
+          return;
+        }
+        if (empty) empty.style.display = 'none';
+        tbody.innerHTML = list.map(r => `
+          <tr>
+            <td>${r.createdAt ? new Date(r.createdAt).toLocaleDateString() : '—'}</td>
+            <td>${r.productId}</td>
+            <td>${r.name}</td>
+            <td>${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</td>
+            <td style="max-width:220px;white-space:normal;">${(r.text || '').slice(0, 120)}</td>
+            <td>${r.status}</td>
+            <td>
+              ${r.status !== 'approved' ? `<button type="button" class="btn btn-sm btn-outline" data-rev-approve="${r.id}">Approve</button>` : ''}
+              ${r.status !== 'rejected' ? `<button type="button" class="btn btn-sm btn-outline" data-rev-reject="${r.id}">Reject</button>` : ''}
+              <button type="button" class="btn-delete" data-rev-del="${r.id}">Delete</button>
+            </td>
+          </tr>
+        `).join('');
+        tbody.querySelectorAll('[data-rev-approve]').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            await fetch('/api/reviews/' + btn.dataset.revApprove, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json', 'x-admin-key': adminPassword },
+              body: JSON.stringify({ status: 'approved' }),
+            });
+            loadReviews();
+          });
+        });
+        tbody.querySelectorAll('[data-rev-reject]').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            await fetch('/api/reviews/' + btn.dataset.revReject, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json', 'x-admin-key': adminPassword },
+              body: JSON.stringify({ status: 'rejected' }),
+            });
+            loadReviews();
+          });
+        });
+        tbody.querySelectorAll('[data-rev-del]').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            if (!confirm('Delete review?')) return;
+            await fetch('/api/reviews/' + btn.dataset.revDel, {
+              method: 'DELETE', headers: { 'x-admin-key': adminPassword },
+            });
+            loadReviews();
+          });
+        });
+      } catch (e) { console.error(e); }
+    }
+
+    /* Subscribers */
+    async function loadSubscribers() {
+      try {
+        const res = await fetch('/api/subscribers', { headers: { 'x-admin-key': adminPassword } });
+        const list = await res.json();
+        const tbody = document.getElementById('subscribers-tbody');
+        const empty = document.getElementById('subscribers-empty');
+        if (!tbody) return;
+        if (!Array.isArray(list) || !list.length) {
+          tbody.innerHTML = '';
+          if (empty) empty.style.display = 'block';
+          return;
+        }
+        if (empty) empty.style.display = 'none';
+        tbody.innerHTML = list.map(email => `<tr><td>${email}</td></tr>`).join('');
+      } catch (e) { console.error(e); }
+    }
+  </script>
+</body>
+</html>
