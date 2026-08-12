@@ -22,9 +22,12 @@
   <header class="site-header">
     <div class="header-inner">
       <button class="mobile-menu-btn" aria-label="Open menu"><span></span><span></span><span></span></button>
+      
+      <!-- Logo -->
       <a href="index.html" class="logo" aria-label="SHOEPHILE Home">
-        <img src="images/logo.jpg" alt="SHOEPHILE — Love Affair with Shoes">
+        <img src="Shoephile_logo.svg" class="shoephile-logo" alt="SHOEPHILE — Love Affair with Shoes">
       </a>
+
       <nav class="nav-links">
         <a href="index.html" class="active">Home</a>
         <a href="shop.html">Shop</a>
@@ -77,19 +80,19 @@
     </form>
   </div>
 
-  <!-- Hero -->
+  <!-- Hero (CMS-driven) -->
   <section class="hero">
     <div class="hero-image">
-      <img src="images/ad9black_0ea25eaa-e8c5-48b1-bfca-66c7f98d929d.webp" alt="SHOEPHILE elegant women's flats" fetchpriority="high">
+      <img id="hero-image" src="images/ad9black_0ea25eaa-e8c5-48b1-bfca-66c7f98d929d.webp" alt="SHOEPHILE elegant women's flats" fetchpriority="high">
     </div>
     <div class="hero-overlay"></div>
     <div class="hero-content">
-      <p class="section-label" style="color:rgba(255,255,255,0.85);letter-spacing:0.3em;">Premium Women's Flats</p>
-      <h1>Love Affair with Shoes</h1>
-      <p>Elegant, comfortable flats designed for everyday sophistication. Discover the refined collection crafted for the modern woman.</p>
+      <p class="section-label" id="hero-eyebrow" style="color:rgba(255,255,255,0.85);letter-spacing:0.3em;">Premium Women's Flats</p>
+      <h1 id="hero-heading">Love Affair with Shoes</h1>
+      <p id="hero-description">Elegant, comfortable flats designed for everyday sophistication. Discover the refined collection crafted for the modern woman.</p>
       <div class="hero-ctas">
-        <a href="shop.html" class="btn btn-primary">Shop Flats</a>
-        <a href="shop.html?category=new" class="btn btn-outline">Explore Collection</a>
+        <a href="shop.html" class="btn btn-primary" id="hero-btn1">Shop Flats</a>
+        <a href="shop.html?category=new" class="btn btn-outline" id="hero-btn2">Explore Collection</a>
       </div>
     </div>
   </section>
@@ -291,6 +294,27 @@
   <script src="js/cart.js"></script>
   <script src="js/main.js"></script>
   <script>
+    // Load CMS home hero content
+    (async function loadHomeContent() {
+      try {
+        const res = await fetch('/api/content/home');
+        if (!res.ok) return;
+        const c = await res.json();
+        const img = document.getElementById('hero-image');
+        if (img && c.heroImage) { img.src = c.heroImage; img.alt = c.heading || 'SHOEPHILE'; }
+        const eye = document.getElementById('hero-eyebrow');
+        if (eye && c.eyebrow) eye.textContent = c.eyebrow;
+        const h = document.getElementById('hero-heading');
+        if (h && c.heading) h.textContent = c.heading;
+        const d = document.getElementById('hero-description');
+        if (d && c.description) d.textContent = c.description;
+        const b1 = document.getElementById('hero-btn1');
+        if (b1) { if (c.btn1Text) b1.textContent = c.btn1Text; if (c.btn1Url) b1.href = c.btn1Url; }
+        const b2 = document.getElementById('hero-btn2');
+        if (b2) { if (c.btn2Text) b2.textContent = c.btn2Text; if (c.btn2Url) b2.href = c.btn2Url; }
+      } catch (e) {}
+    })();
+
     // Load home reviews
     (async function() {
       try {

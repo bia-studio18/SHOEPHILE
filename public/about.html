@@ -77,13 +77,13 @@
     <div class="container">
       <div class="brand-story fade-in">
         <div class="brand-story-image">
-          <img src="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%271600%27 height=%27900%27%3E%3Crect fill=%27%23e8e6e1%27 width=%271600%27 height=%27900%27/%3E%3Ctext x=%2750%25%27 y=%2750%25%27 text-anchor=%27middle%27 fill=%27%23b8b0a4%27 font-family=%27Georgia%27 font-size=%2736%27%3ESHOEPHILE%3C/text%3E%3C/svg%3E" alt="Artisan craftsmanship">
+          <img id="about-hero-image" src="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%271600%27 height=%27900%27%3E%3Crect fill=%27%23e8e6e1%27 width=%271600%27 height=%27900%27/%3E%3Ctext x=%2750%25%27 y=%2750%25%27 text-anchor=%27middle%27 fill=%27%23b8b0a4%27 font-family=%27Georgia%27 font-size=%2736%27%3ESHOEPHILE%3C/text%3E%3C/svg%3E" alt="Artisan craftsmanship">
         </div>
         <div class="brand-story-content">
-          <p class="section-label">Craftsmanship</p>
-          <h2>Made With Intention</h2>
-          <p>Every SHOEPHILE piece begins with a sketch and ends with the hands of a master artisan. We partner exclusively with ateliers in Italy, Spain, and Portugal — regions with generations of footwear expertise.</p>
-          <p>From the selection of full-grain European leathers to the final hand-finishing of each sole, no detail is left to chance. Limited production runs ensure that every pair receives the attention it deserves.</p>
+          <p class="section-label" id="about-craft-label">Craftsmanship</p>
+          <h2 id="about-craft-heading">Made With Intention</h2>
+          <p id="about-craft-para1">Every SHOEPHILE piece begins with a sketch and ends with the hands of a master artisan. We partner exclusively with ateliers in Italy, Spain, and Portugal — regions with generations of footwear expertise.</p>
+          <p id="about-craft-para2">From the selection of full-grain European leathers to the final hand-finishing of each sole, no detail is left to chance. Limited production runs ensure that every pair receives the attention it deserves.</p>
         </div>
       </div>
     </div>
@@ -92,10 +92,10 @@
   <section class="section section-alt">
     <div class="container">
       <div class="section-header fade-in">
-        <p class="section-label">What We Stand For</p>
-        <h2 class="section-title">Our Pillars</h2>
+        <p class="section-label" id="about-pillars-label">What We Stand For</p>
+        <h2 class="section-title" id="about-pillars-heading">Our Pillars</h2>
       </div>
-      <div class="about-values fade-in">
+      <div class="about-values fade-in" id="about-pillars-grid">
         <div class="value-card">
           <h3>Timeless Design</h3>
           <p>We create silhouettes that transcend seasons. Clean lines, balanced proportions, and a refusal of fleeting trends define every collection.</p>
@@ -112,23 +112,7 @@
     </div>
   </section>
 
-  <section class="section">
-    <div class="container">
-      <div class="brand-story fade-in">
-        <div class="brand-story-image">
-          <img src="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%271600%27 height=%27900%27%3E%3Crect fill=%27%23e8e6e1%27 width=%271600%27 height=%27900%27/%3E%3Ctext x=%2750%25%27 y=%2750%25%27 text-anchor=%27middle%27 fill=%27%23b8b0a4%27 font-family=%27Georgia%27 font-size=%2736%27%3ESHOEPHILE%3C/text%3E%3C/svg%3E" alt="SHOEPHILE quality">
-        </div>
-        <div class="brand-story-content">
-          <p class="section-label">Our Promise</p>
-          <h2>Quality Without Compromise</h2>
-          <p>When you choose SHOEPHILE, you choose more than a pair of shoes. You choose a commitment to excellence that begins long before the first stitch and continues long after delivery.</p>
-          <p>We stand behind every product with standard shipping of PKR 300 across Pakistan, complimentary returns within 30 days, and a dedicated client care team ready to assist you.</p>
-          <a href="shop.html" class="btn btn-outline">Explore the Collection</a>
-        </div>
-      </div>
-    </div>
-  </section>
-
+  
   <section class="newsletter">
     <div class="container fade-in">
       <p class="section-label">Stay Connected</p>
@@ -181,5 +165,33 @@
   <script src="js/products.js"></script>
   <script src="js/cart.js"></script>
   <script src="js/main.js"></script>
+  <script>
+    (async function loadAboutContent() {
+      try {
+        const res = await fetch('/api/content/about');
+        if (!res.ok) return;
+        const c = await res.json();
+        const img = document.getElementById('about-hero-image');
+        if (img && c.heroImage) { img.src = c.heroImage; img.alt = c.craftHeading || 'SHOEPHILE'; }
+        const set = (id, val) => { const el = document.getElementById(id); if (el && val != null && val !== '') el.textContent = val; };
+        set('about-craft-label', c.craftLabel);
+        set('about-craft-heading', c.craftHeading);
+        set('about-craft-para1', c.craftPara1);
+        set('about-craft-para2', c.craftPara2);
+        set('about-pillars-label', c.pillarsLabel);
+        set('about-pillars-heading', c.pillarsHeading);
+        const grid = document.getElementById('about-pillars-grid');
+        if (grid && Array.isArray(c.pillars) && c.pillars.length) {
+          grid.innerHTML = c.pillars.map(p => `
+            <div class="value-card">
+              ${p.image ? `<img src="${p.image}" alt="${(p.title || '').replace(/"/g, '')}" style="width:100%;height:160px;object-fit:cover;margin-bottom:1rem;">` : ''}
+              <h3>${p.title || ''}</h3>
+              <p>${p.description || ''}</p>
+            </div>
+          `).join('');
+        }
+      } catch (e) {}
+    })();
+  </script>
 </body>
 </html>

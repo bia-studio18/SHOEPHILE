@@ -62,10 +62,65 @@ async function couponsCol() {
 async function reviewsCol() {
   return (await getDb()).collection('reviews');
 }
+async function contentCol() {
+  return (await getDb()).collection('websiteContent');
+}
 
 /* Shipping constants — PKR */
 const SHIPPING_FEE = 300;
 const FREE_SHIPPING_THRESHOLD = 3000;
+
+/* Default CMS content (used when DB has no document yet) */
+const DEFAULT_HOME_CONTENT = {
+  key: 'home',
+  heroImage: '',
+  eyebrow: "PREMIUM WOMEN'S FLATS",
+  heading: 'Love Affair with Shoes',
+  description:
+    'Elegant, comfortable flats designed for everyday sophistication. Discover the refined collection crafted for the modern woman.',
+  btn1Text: 'Shop Flats',
+  btn1Url: 'shop.html',
+  btn2Text: 'Explore Collection',
+  btn2Url: 'shop.html?category=new',
+  updatedAt: null,
+};
+
+const DEFAULT_ABOUT_CONTENT = {
+  key: 'about',
+  heroImage: '',
+  craftLabel: 'Craftsmanship',
+  craftHeading: 'Made With Intention',
+  craftPara1:
+    'Every SHOEPHILE piece begins with a sketch and ends with the hands of a master artisan. We partner exclusively with ateliers that share our standards for refined women\'s flats.',
+  craftPara2:
+    'From the selection of quality materials to the final finishing of each pair, no detail is left to chance. Limited production runs ensure that every pair receives the attention it deserves.',
+  pillarsLabel: 'What We Stand For',
+  pillarsHeading: 'Our Pillars',
+  pillars: [
+    {
+      id: '1',
+      title: 'Timeless Design',
+      description:
+        'We create silhouettes that transcend seasons. Clean lines, balanced proportions, and a refusal of fleeting trends define every collection.',
+      image: '',
+    },
+    {
+      id: '2',
+      title: 'Exceptional Quality',
+      description:
+        'Only the finest materials make the cut. We source premium materials and work with artisans who share our uncompromising standards.',
+      image: '',
+    },
+    {
+      id: '3',
+      title: 'Conscious Luxury',
+      description:
+        'We produce thoughtfully to minimize waste, prioritize durability over disposability, and design shoes meant to last.',
+      image: '',
+    },
+  ],
+  updatedAt: null,
+};
 
 function requireAdmin(req, res, next) {
   if (!ADMIN_PASSWORD) {
@@ -1177,6 +1232,139 @@ app.get('/api/shipping', (_req, res) => {
     currency: 'PKR',
     note: `Flat shipping PKR ${SHIPPING_FEE}. Free shipping on orders above PKR ${FREE_SHIPPING_THRESHOLD}.`,
   });
+});
+
+/* ---------- Website CMS content (Home + About) ---------- */
+app.get('/api/content/home', async (_req, res) => {
+  try {
+    const col = await contentCol();
+    let doc = await col.findOne({ key: 'home' });
+    if (!doc) {
+      await col.updateOne({ key: 'home' }, { $setOnInsert: { ...DEFAULT_HOME_CONTENT } }, { upsert: true });
+      doc = await col.findOne({ key: 'home' });
+    }
+    res.json({
+      heroImage: doc.heroImage || '',
+      eyebrow: doc.eyebrow || DEFAULT_HOME_CONTENT.eyebrow,
+      heading: doc.heading || DEFAULT_HOME_CONTENT.heading,
+      description: doc.description || DEFAULT_HOME_CONTENT.description,
+      btn1Text: doc.btn1Text || DEFAULT_HOME_CONTENT.btn1Text,
+      btn1Url: doc.btn1Url || DEFAULT_HOME_CONTENT.btn1Url,
+      btn2Text: doc.btn2Text || DEFAULT_HOME_CONTENT.btn2Text,
+      btn2Url: doc.btn2Url || DEFAULT_HOME_CONTENT.btn2Url,
+      updatedAt: doc.updatedAt || null,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message || 'Failed to load home content' });
+  }
+});
+
+app.put('/api/content/home', requireAdmin, upload.single('heroImage'), async (req, res) => {
+  try {
+    const col = await contentCol();
+    const body = req.body || {};
+    const existing = (await col.findOne({ key: 'home' })) || { ...DEFAULT_HOME_CONTENT };
+
+    let heroImage = existing.heroImage || '';
+    if (req.file) {
+      const urls = filesToDataUrls([req.file]);
+      if (urls[0]) heroImage = urls[0];
+    } else if (body.heroImage === '' || body.clearHeroImage === '1') {
+      heroImage = '';
+    } else if (body.heroImage && String(body.heroImage).startsWith('data:')) {
+      heroImage = body.heroImage;
+    }
+
+    const update = {
+      key: 'home',
+      heroImage,
+      eyebrow: (body.eyebrow != null ? String(body.eyebrow) : existing.eyebrow || DEFAULT_HOME_CONTENT.eyebrow).trim(),
+      heading: (body.heading != null ? String(body.heading) : existing.heading || DEFAULT_HOME_CONTENT.heading).trim(),
+      description: (body.description != null ? String(body.description) : existing.description || DEFAULT_HOME_CONTENT.description).trim(),
+      btn1Text: (body.btn1Text != null ? String(body.btn1Text) : existing.btn1Text || DEFAULT_HOME_CONTENT.btn1Text).trim(),
+      btn1Url: (body.btn1Url != null ? String(body.btn1Url) : existing.btn1Url || DEFAULT_HOME_CONTENT.btn1Url).trim(),
+      btn2Text: (body.btn2Text != null ? String(body.btn2Text) : existing.btn2Text || DEFAULT_HOME_CONTENT.btn2Text).trim(),
+      btn2Url: (body.btn2Url != null ? String(body.btn2Url) : existing.btn2Url || DEFAULT_HOME_CONTENT.btn2Url).trim(),
+      updatedAt: new Date(),
+    };
+
+    await col.updateOne({ key: 'home' }, { $set: update }, { upsert: true });
+    res.json({ success: true, content: update });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message || 'Failed to save home content' });
+  }
+});
+
+app.get('/api/content/about', async (_req, res) => {
+  try {
+    const col = await contentCol();
+    let doc = await col.findOne({ key: 'about' });
+    if (!doc) {
+      await col.updateOne({ key: 'about' }, { $setOnInsert: { ...DEFAULT_ABOUT_CONTENT } }, { upsert: true });
+      doc = await col.findOne({ key: 'about' });
+    }
+    res.json({
+      heroImage: doc.heroImage || '',
+      craftLabel: doc.craftLabel || DEFAULT_ABOUT_CONTENT.craftLabel,
+      craftHeading: doc.craftHeading || DEFAULT_ABOUT_CONTENT.craftHeading,
+      craftPara1: doc.craftPara1 || DEFAULT_ABOUT_CONTENT.craftPara1,
+      craftPara2: doc.craftPara2 || DEFAULT_ABOUT_CONTENT.craftPara2,
+      pillarsLabel: doc.pillarsLabel || DEFAULT_ABOUT_CONTENT.pillarsLabel,
+      pillarsHeading: doc.pillarsHeading || DEFAULT_ABOUT_CONTENT.pillarsHeading,
+      pillars: Array.isArray(doc.pillars) ? doc.pillars : DEFAULT_ABOUT_CONTENT.pillars,
+      updatedAt: doc.updatedAt || null,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message || 'Failed to load about content' });
+  }
+});
+
+app.put('/api/content/about', requireAdmin, upload.single('heroImage'), async (req, res) => {
+  try {
+    const col = await contentCol();
+    const body = req.body || {};
+    const existing = (await col.findOne({ key: 'about' })) || { ...DEFAULT_ABOUT_CONTENT };
+
+    let heroImage = existing.heroImage || '';
+    if (req.file) {
+      const urls = filesToDataUrls([req.file]);
+      if (urls[0]) heroImage = urls[0];
+    } else if (body.heroImage === '' || body.clearHeroImage === '1') {
+      heroImage = '';
+    } else if (body.heroImage && String(body.heroImage).startsWith('data:')) {
+      heroImage = body.heroImage;
+    }
+
+    let pillars = existing.pillars || DEFAULT_ABOUT_CONTENT.pillars;
+    if (body.pillars) {
+      try {
+        const parsed = typeof body.pillars === 'string' ? JSON.parse(body.pillars) : body.pillars;
+        if (Array.isArray(parsed)) pillars = parsed;
+      } catch { /* keep existing */ }
+    }
+
+    const update = {
+      key: 'about',
+      heroImage,
+      craftLabel: (body.craftLabel != null ? String(body.craftLabel) : existing.craftLabel || DEFAULT_ABOUT_CONTENT.craftLabel).trim(),
+      craftHeading: (body.craftHeading != null ? String(body.craftHeading) : existing.craftHeading || DEFAULT_ABOUT_CONTENT.craftHeading).trim(),
+      craftPara1: (body.craftPara1 != null ? String(body.craftPara1) : existing.craftPara1 || DEFAULT_ABOUT_CONTENT.craftPara1).trim(),
+      craftPara2: (body.craftPara2 != null ? String(body.craftPara2) : existing.craftPara2 || DEFAULT_ABOUT_CONTENT.craftPara2).trim(),
+      pillarsLabel: (body.pillarsLabel != null ? String(body.pillarsLabel) : existing.pillarsLabel || DEFAULT_ABOUT_CONTENT.pillarsLabel).trim(),
+      pillarsHeading: (body.pillarsHeading != null ? String(body.pillarsHeading) : existing.pillarsHeading || DEFAULT_ABOUT_CONTENT.pillarsHeading).trim(),
+      pillars,
+      updatedAt: new Date(),
+    };
+
+    await col.updateOne({ key: 'about' }, { $set: update }, { upsert: true });
+    res.json({ success: true, content: update });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message || 'Failed to save about content' });
+  }
 });
 
 /* Health */

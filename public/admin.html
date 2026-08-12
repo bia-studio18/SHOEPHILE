@@ -106,6 +106,8 @@
           <button type="button" class="admin-tab" data-tab="coupons">Coupons</button>
           <button type="button" class="admin-tab" data-tab="reviews">Reviews</button>
           <button type="button" class="admin-tab" data-tab="subscribers">Subscribers</button>
+          <button type="button" class="admin-tab" data-tab="home-content">Home Page</button>
+          <button type="button" class="admin-tab" data-tab="about-content">About Page</button>
         </div>
 
         <!-- PRODUCTS PANEL -->
@@ -344,6 +346,109 @@
             <p id="subscribers-empty" class="text-center text-muted" style="padding:2rem;display:none;">No subscribers yet.</p>
           </div>
         </div>
+
+        <!-- HOME PAGE CONTENT -->
+        <div class="admin-panel" id="panel-home-content">
+          <div class="admin-form-card" style="max-width:720px;">
+            <h2>Home Page — Hero Section</h2>
+            <p class="text-muted" style="font-size:0.85rem;margin-bottom:1.25rem;">Edit hero image, text and buttons. Changes appear on the live homepage after save.</p>
+            <form id="home-content-form" class="admin-form">
+              <div class="form-group">
+                <label>Hero Image</label>
+                <input type="file" id="home-hero-file" accept="image/*">
+                <div id="home-hero-preview" style="margin-top:0.75rem;"></div>
+                <small style="color:var(--muted);font-size:0.7rem;">Upload a new image to replace the current hero background.</small>
+              </div>
+              <div class="form-group">
+                <label>Eyebrow text</label>
+                <input type="text" id="home-eyebrow" placeholder="PREMIUM WOMEN'S FLATS">
+              </div>
+              <div class="form-group">
+                <label>Main heading</label>
+                <input type="text" id="home-heading" placeholder="Love Affair with Shoes">
+              </div>
+              <div class="form-group">
+                <label>Description</label>
+                <textarea id="home-description" rows="3"></textarea>
+              </div>
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label>Button 1 text</label>
+                  <input type="text" id="home-btn1-text">
+                </div>
+                <div class="form-group">
+                  <label>Button 1 URL</label>
+                  <input type="text" id="home-btn1-url" placeholder="shop.html">
+                </div>
+              </div>
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label>Button 2 text</label>
+                  <input type="text" id="home-btn2-text">
+                </div>
+                <div class="form-group">
+                  <label>Button 2 URL</label>
+                  <input type="text" id="home-btn2-url" placeholder="shop.html?category=new">
+                </div>
+              </div>
+              <div style="display:flex;gap:0.75rem;margin-top:1.25rem;">
+                <button type="submit" class="btn btn-primary" style="flex:1;">Save Changes</button>
+                <button type="button" class="btn btn-outline" id="home-content-reload">Reload</button>
+              </div>
+              <p id="home-content-msg" style="font-size:0.85rem;margin-top:0.75rem;"></p>
+            </form>
+          </div>
+        </div>
+
+        <!-- ABOUT PAGE CONTENT -->
+        <div class="admin-panel" id="panel-about-content">
+          <div class="admin-form-card" style="max-width:800px;">
+            <h2>About Page Content</h2>
+            <p class="text-muted" style="font-size:0.85rem;margin-bottom:1.25rem;">Manage craftsmanship section, main image and pillars.</p>
+            <form id="about-content-form" class="admin-form">
+              <div class="form-group">
+                <label>Main / Craftsmanship image</label>
+                <input type="file" id="about-hero-file" accept="image/*">
+                <div id="about-hero-preview" style="margin-top:0.75rem;"></div>
+              </div>
+              <h3 style="margin:1.5rem 0 0.75rem;font-size:1rem;">Craftsmanship section</h3>
+              <div class="form-group">
+                <label>Label / eyebrow</label>
+                <input type="text" id="about-craft-label">
+              </div>
+              <div class="form-group">
+                <label>Heading</label>
+                <input type="text" id="about-craft-heading">
+              </div>
+              <div class="form-group">
+                <label>First paragraph</label>
+                <textarea id="about-craft-para1" rows="3"></textarea>
+              </div>
+              <div class="form-group">
+                <label>Second paragraph</label>
+                <textarea id="about-craft-para2" rows="3"></textarea>
+              </div>
+              <h3 style="margin:1.5rem 0 0.75rem;font-size:1rem;">Our Pillars</h3>
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label>Section label</label>
+                  <input type="text" id="about-pillars-label">
+                </div>
+                <div class="form-group">
+                  <label>Section heading</label>
+                  <input type="text" id="about-pillars-heading">
+                </div>
+              </div>
+              <div id="pillars-editor" style="margin:1rem 0;"></div>
+              <button type="button" class="btn btn-outline" id="add-pillar-btn" style="margin-bottom:1rem;">+ Add Pillar</button>
+              <div style="display:flex;gap:0.75rem;margin-top:0.5rem;">
+                <button type="submit" class="btn btn-primary" style="flex:1;">Save Changes</button>
+                <button type="button" class="btn btn-outline" id="about-content-reload">Reload</button>
+              </div>
+              <p id="about-content-msg" style="font-size:0.85rem;margin-top:0.75rem;"></p>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -410,6 +515,8 @@
         if (tab.dataset.tab === 'coupons') loadCoupons();
         if (tab.dataset.tab === 'reviews') loadReviews();
         if (tab.dataset.tab === 'subscribers') loadSubscribers();
+        if (tab.dataset.tab === 'home-content') loadHomeContentForm();
+        if (tab.dataset.tab === 'about-content') loadAboutContentForm();
       });
     });
 
@@ -920,6 +1027,196 @@
         tbody.innerHTML = list.map(email => `<tr><td>${email}</td></tr>`).join('');
       } catch (e) { console.error(e); }
     }
+
+    /* ---------- Home Page CMS ---------- */
+    let homeHeroFile = null;
+    async function loadHomeContentForm() {
+      try {
+        const res = await fetch('/api/content/home');
+        const c = await res.json();
+        document.getElementById('home-eyebrow').value = c.eyebrow || '';
+        document.getElementById('home-heading').value = c.heading || '';
+        document.getElementById('home-description').value = c.description || '';
+        document.getElementById('home-btn1-text').value = c.btn1Text || '';
+        document.getElementById('home-btn1-url').value = c.btn1Url || '';
+        document.getElementById('home-btn2-text').value = c.btn2Text || '';
+        document.getElementById('home-btn2-url').value = c.btn2Url || '';
+        const prev = document.getElementById('home-hero-preview');
+        if (prev) {
+          prev.innerHTML = c.heroImage
+            ? `<img src="${c.heroImage}" alt="Hero preview" style="max-width:100%;max-height:200px;object-fit:cover;border:1px solid var(--border);">`
+            : '<span class="text-muted" style="font-size:0.8rem;">No custom image (using default)</span>';
+        }
+        homeHeroFile = null;
+        document.getElementById('home-hero-file').value = '';
+        document.getElementById('home-content-msg').textContent = '';
+      } catch (e) {
+        document.getElementById('home-content-msg').textContent = 'Could not load content.';
+      }
+    }
+    document.getElementById('home-hero-file')?.addEventListener('change', (e) => {
+      const f = e.target.files[0];
+      homeHeroFile = f || null;
+      const prev = document.getElementById('home-hero-preview');
+      if (f && prev) {
+        const url = URL.createObjectURL(f);
+        prev.innerHTML = `<img src="${url}" alt="Preview" style="max-width:100%;max-height:200px;object-fit:cover;border:1px solid var(--border);">`;
+      }
+    });
+    document.getElementById('home-content-reload')?.addEventListener('click', loadHomeContentForm);
+    document.getElementById('home-content-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById('home-content-msg');
+      const fd = new FormData();
+      fd.append('eyebrow', document.getElementById('home-eyebrow').value);
+      fd.append('heading', document.getElementById('home-heading').value);
+      fd.append('description', document.getElementById('home-description').value);
+      fd.append('btn1Text', document.getElementById('home-btn1-text').value);
+      fd.append('btn1Url', document.getElementById('home-btn1-url').value);
+      fd.append('btn2Text', document.getElementById('home-btn2-text').value);
+      fd.append('btn2Url', document.getElementById('home-btn2-url').value);
+      if (homeHeroFile) fd.append('heroImage', homeHeroFile);
+      try {
+        const res = await fetch('/api/content/home', {
+          method: 'PUT',
+          headers: { 'x-admin-key': adminPassword },
+          body: fd,
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Save failed');
+        msg.style.color = 'var(--success)';
+        msg.textContent = 'Home page content saved. Refresh the homepage to see changes.';
+        homeHeroFile = null;
+        loadHomeContentForm();
+      } catch (err) {
+        msg.style.color = 'var(--error)';
+        msg.textContent = err.message || 'Could not save.';
+      }
+    });
+
+    /* ---------- About Page CMS ---------- */
+    let aboutHeroFile = null;
+    let aboutPillars = [];
+    function renderPillarsEditor() {
+      const box = document.getElementById('pillars-editor');
+      if (!box) return;
+      if (!aboutPillars.length) {
+        box.innerHTML = '<p class="text-muted" style="font-size:0.85rem;">No pillars yet. Click “Add Pillar”.</p>';
+        return;
+      }
+      box.innerHTML = aboutPillars.map((p, i) => `
+        <div class="pillar-row" data-idx="${i}" style="border:1px solid var(--border);padding:1rem;margin-bottom:0.75rem;background:var(--bg-alt);">
+          <div class="form-group">
+            <label>Title</label>
+            <input type="text" class="pillar-title" value="${(p.title || '').replace(/"/g, '&quot;')}">
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <textarea class="pillar-desc" rows="2">${(p.description || '').replace(/</g, '&lt;')}</textarea>
+          </div>
+          <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+            <button type="button" class="btn btn-outline btn-sm pillar-up" data-idx="${i}">↑</button>
+            <button type="button" class="btn btn-outline btn-sm pillar-down" data-idx="${i}">↓</button>
+            <button type="button" class="btn-delete pillar-del" data-idx="${i}">Delete</button>
+          </div>
+        </div>
+      `).join('');
+      box.querySelectorAll('.pillar-title').forEach((inp, i) => {
+        inp.addEventListener('input', () => { aboutPillars[i].title = inp.value; });
+      });
+      box.querySelectorAll('.pillar-desc').forEach((inp, i) => {
+        inp.addEventListener('input', () => { aboutPillars[i].description = inp.value; });
+      });
+      box.querySelectorAll('.pillar-del').forEach(btn => {
+        btn.addEventListener('click', () => {
+          aboutPillars.splice(parseInt(btn.dataset.idx, 10), 1);
+          renderPillarsEditor();
+        });
+      });
+      box.querySelectorAll('.pillar-up').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const i = parseInt(btn.dataset.idx, 10);
+          if (i <= 0) return;
+          [aboutPillars[i - 1], aboutPillars[i]] = [aboutPillars[i], aboutPillars[i - 1]];
+          renderPillarsEditor();
+        });
+      });
+      box.querySelectorAll('.pillar-down').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const i = parseInt(btn.dataset.idx, 10);
+          if (i >= aboutPillars.length - 1) return;
+          [aboutPillars[i], aboutPillars[i + 1]] = [aboutPillars[i + 1], aboutPillars[i]];
+          renderPillarsEditor();
+        });
+      });
+    }
+    async function loadAboutContentForm() {
+      try {
+        const res = await fetch('/api/content/about');
+        const c = await res.json();
+        document.getElementById('about-craft-label').value = c.craftLabel || '';
+        document.getElementById('about-craft-heading').value = c.craftHeading || '';
+        document.getElementById('about-craft-para1').value = c.craftPara1 || '';
+        document.getElementById('about-craft-para2').value = c.craftPara2 || '';
+        document.getElementById('about-pillars-label').value = c.pillarsLabel || '';
+        document.getElementById('about-pillars-heading').value = c.pillarsHeading || '';
+        aboutPillars = Array.isArray(c.pillars) ? c.pillars.map(p => ({ ...p })) : [];
+        renderPillarsEditor();
+        const prev = document.getElementById('about-hero-preview');
+        if (prev) {
+          prev.innerHTML = c.heroImage
+            ? `<img src="${c.heroImage}" alt="About preview" style="max-width:100%;max-height:200px;object-fit:cover;border:1px solid var(--border);">`
+            : '<span class="text-muted" style="font-size:0.8rem;">No custom image</span>';
+        }
+        aboutHeroFile = null;
+        document.getElementById('about-hero-file').value = '';
+        document.getElementById('about-content-msg').textContent = '';
+      } catch (e) {
+        document.getElementById('about-content-msg').textContent = 'Could not load about content.';
+      }
+    }
+    document.getElementById('about-hero-file')?.addEventListener('change', (e) => {
+      const f = e.target.files[0];
+      aboutHeroFile = f || null;
+      const prev = document.getElementById('about-hero-preview');
+      if (f && prev) {
+        prev.innerHTML = `<img src="${URL.createObjectURL(f)}" alt="Preview" style="max-width:100%;max-height:200px;object-fit:cover;border:1px solid var(--border);">`;
+      }
+    });
+    document.getElementById('add-pillar-btn')?.addEventListener('click', () => {
+      aboutPillars.push({ id: String(Date.now()), title: 'New Pillar', description: '', image: '' });
+      renderPillarsEditor();
+    });
+    document.getElementById('about-content-reload')?.addEventListener('click', loadAboutContentForm);
+    document.getElementById('about-content-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById('about-content-msg');
+      const fd = new FormData();
+      fd.append('craftLabel', document.getElementById('about-craft-label').value);
+      fd.append('craftHeading', document.getElementById('about-craft-heading').value);
+      fd.append('craftPara1', document.getElementById('about-craft-para1').value);
+      fd.append('craftPara2', document.getElementById('about-craft-para2').value);
+      fd.append('pillarsLabel', document.getElementById('about-pillars-label').value);
+      fd.append('pillarsHeading', document.getElementById('about-pillars-heading').value);
+      fd.append('pillars', JSON.stringify(aboutPillars));
+      if (aboutHeroFile) fd.append('heroImage', aboutHeroFile);
+      try {
+        const res = await fetch('/api/content/about', {
+          method: 'PUT',
+          headers: { 'x-admin-key': adminPassword },
+          body: fd,
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Save failed');
+        msg.style.color = 'var(--success)';
+        msg.textContent = 'About page content saved. Refresh the About page to see changes.';
+        aboutHeroFile = null;
+        loadAboutContentForm();
+      } catch (err) {
+        msg.style.color = 'var(--error)';
+        msg.textContent = err.message || 'Could not save.';
+      }
+    });
   </script>
 </body>
 </html>
