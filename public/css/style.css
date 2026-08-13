@@ -784,3 +784,70 @@ a.logo img.shoephile-logo {
 }
 .product-row-check { width: 36px; text-align: center; }
 .bulk-actions { margin-bottom: 0.75rem; display: flex; gap: 0.5rem; align-items: center; }
+
+/* WhatsApp Floating Button */
+.whatsapp-float {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 9999;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 13px 20px;
+    border-radius: 50px;
+
+    background: #111111;
+    color: #ffffff;
+
+    text-decoration: none;
+    font-family: 'Jost', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+
+    transition: all 0.3s ease;
+}
+
+.whatsapp-icon {
+    width: 28px;
+    height: 28px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+    background: #ffffff;
+    color: #111111;
+
+    font-size: 13px;
+}
+
+.whatsapp-float:hover {
+    background: #333333;
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+}
+
+.whatsapp-float:hover .whatsapp-icon {
+    transform: scale(1.08);
+}
+
+@media (max-width: 600px) {
+    .whatsapp-float {
+        right: 16px;
+        bottom: 18px;
+        padding: 11px 16px;
+        font-size: 13px;
+    }
+
+    .whatsapp-icon {
+        width: 26px;
+        height: 26px;
+    }
+}
