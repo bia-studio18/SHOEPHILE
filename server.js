@@ -2,14 +2,18 @@
  * SHOEPHILE Backend — MongoDB Atlas
  * Products, orders, subscribers (no local JSON / disk writes)
  * Images stored as base64 data URLs in MongoDB (Vercel-safe)
+ * Customer auth: signup, login, JWT, forgot/reset password, my-orders
  */
 
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const crypto = require('crypto');
 const multer = require('multer');
 const nodemailer = require('nodemailer');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const { MongoClient, ObjectId } = require('mongodb');
 
 const app = express();
@@ -17,8 +21,14 @@ const PORT = process.env.PORT || 3000;
 const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || '').trim().toLowerCase();
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
 const CONTACT_EMAIL = process.env.CONTACT_EMAIL || 'shoephile218@gmail.com';
+const JWT_SECRET = process.env.JWT_SECRET || '';
+const FRONTEND_URL = (process.env.FRONTEND_URL || 'https://shoephile.vercel.app').replace(/\/$/, '');
+
 if (!ADMIN_PASSWORD) {
   console.warn('⚠ ADMIN_PASSWORD is not set. Admin routes will reject all requests.');
+}
+if (!JWT_SECRET) {
+  console.warn('⚠ JWT_SECRET is not set. Customer auth routes will reject token operations.');
 }
 const MONGODB_URI = process.env.MONGODB_URI;
 
@@ -64,6 +74,16 @@ async function reviewsCol() {
 }
 async function contentCol() {
   return (await getDb()).collection('websiteContent');
+}
+async function usersCol() {
+  const col = (await getDb()).collection('users');
+  // Ensure unique index on email (safe to call repeatedly)
+  try {
+    await col.createIndex({ email: 1 }, { unique: true });
+  } catch (_) {
+    /* index may already exist */
+  }
+  return col;
 }
 
 /* Shipping constants — PKR */
@@ -132,6 +152,74 @@ function requireAdmin(req, res, next) {
     return res.status(401).json({ error: 'Unauthorized. Invalid admin credentials.' });
   }
   next();
+}
+
+/* ---------- Customer JWT auth helpers ---------- */
+function signUserToken(user) {
+  if (!JWT_SECRET) {
+    throw new Error('JWT_SECRET is not configured');
+  }
+  return jwt.sign(
+    { userId: user._id.toString(), email: user.email },
+    JWT_SECRET,
+    { expiresIn: '7d' }
+  );
+}
+
+function serializeUser(doc) {
+  if (!doc) return null;
+  return {
+    id: doc._id.toString(),
+    name: doc.name || '',
+    email: doc.email || '',
+    phone: doc.phone || '',
+  };
+}
+
+function requireUser(req, res, next) {
+  if (!JWT_SECRET) {
+    return res.status(503).json({ error: 'Authentication not configured. Set JWT_SECRET.' });
+  }
+  const header = req.headers.authorization || '';
+  const match = header.match(/^Bearer\s+(.+)$/i);
+  if (!match) {
+    return res.status(401).json({ error: 'Unauthorized. Missing or invalid token.' });
+  }
+  try {
+    const payload = jwt.verify(match[1], JWT_SECRET);
+    if (!payload || !payload.userId) {
+      return res.status(401).json({ error: 'Unauthorized. Invalid token.' });
+    }
+    req.user = { userId: payload.userId, email: payload.email };
+    next();
+  } catch {
+    return res.status(401).json({ error: 'Unauthorized. Invalid or expired token.' });
+  }
+}
+
+/** Optional auth: attaches req.user if valid Bearer token is present; never blocks. */
+function optionalUser(req, _res, next) {
+  if (!JWT_SECRET) return next();
+  const header = req.headers.authorization || '';
+  const match = header.match(/^Bearer\s+(.+)$/i);
+  if (!match) return next();
+  try {
+    const payload = jwt.verify(match[1], JWT_SECRET);
+    if (payload && payload.userId) {
+      req.user = { userId: payload.userId, email: payload.email };
+    }
+  } catch {
+    /* ignore invalid token for optional auth */
+  }
+  next();
+}
+
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function hashResetToken(rawToken) {
+  return crypto.createHash('sha256').update(rawToken).digest('hex');
 }
 
 /* Memory storage — no disk writes (Vercel-safe) */
@@ -237,6 +325,7 @@ function serializeOrder(doc) {
     shippingFee: doc.shippingFee,
     total: doc.total,
     notes: doc.notes || '',
+    userId: doc.userId ? doc.userId.toString() : null,
   };
 }
 
@@ -274,6 +363,253 @@ function escapeHtml(s) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
 }
+
+/* ---------- Auth: Signup ---------- */
+app.post('/api/auth/signup', async (req, res) => {
+  try {
+    if (!JWT_SECRET) {
+      return res.status(503).json({ error: 'Authentication not configured. Set JWT_SECRET.' });
+    }
+    const body = req.body || {};
+    const name = String(body.name || '').trim();
+    const email = String(body.email || '').trim().toLowerCase();
+    const phone = String(body.phone || '').trim();
+    const password = String(body.password || '');
+    const confirmPassword = String(body.confirmPassword || '');
+
+    if (!name || !email || !password) {
+      return res.status(400).json({ error: 'Name, email and password are required' });
+    }
+    if (!isValidEmail(email)) {
+      return res.status(400).json({ error: 'Valid email is required' });
+    }
+    if (password.length < 8) {
+      return res.status(400).json({ error: 'Password must be at least 8 characters' });
+    }
+    if (password !== confirmPassword) {
+      return res.status(400).json({ error: 'Passwords do not match' });
+    }
+
+    const col = await usersCol();
+    const existing = await col.findOne({ email });
+    if (existing) {
+      return res.status(409).json({ error: 'An account with this email already exists' });
+    }
+
+    const passwordHash = await bcrypt.hash(password, 12);
+    const now = new Date();
+    const userDoc = {
+      name,
+      email,
+      phone,
+      passwordHash,
+      resetTokenHash: null,
+      resetTokenExpires: null,
+      createdAt: now,
+      updatedAt: now,
+    };
+    const result = await col.insertOne(userDoc);
+    userDoc._id = result.insertedId;
+
+    const token = signUserToken(userDoc);
+    res.status(201).json({
+      success: true,
+      token,
+      user: serializeUser(userDoc),
+    });
+  } catch (err) {
+    console.error(err);
+    if (err.code === 11000) {
+      return res.status(409).json({ error: 'An account with this email already exists' });
+    }
+    res.status(500).json({ error: err.message || 'Could not create account' });
+  }
+});
+
+/* ---------- Auth: Login ---------- */
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    if (!JWT_SECRET) {
+      return res.status(503).json({ error: 'Authentication not configured. Set JWT_SECRET.' });
+    }
+    const body = req.body || {};
+    const email = String(body.email || '').trim().toLowerCase();
+    const password = String(body.password || '');
+
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' });
+    }
+
+    const col = await usersCol();
+    const user = await col.findOne({ email });
+    if (!user || !user.passwordHash) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    const match = await bcrypt.compare(password, user.passwordHash);
+    if (!match) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    const token = signUserToken(user);
+    res.json({
+      success: true,
+      token,
+      user: serializeUser(user),
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message || 'Could not log in' });
+  }
+});
+
+/* ---------- Auth: Current user ---------- */
+app.get('/api/auth/me', requireUser, async (req, res) => {
+  try {
+    const col = await usersCol();
+    if (!ObjectId.isValid(req.user.userId)) {
+      return res.status(401).json({ error: 'Unauthorized. Invalid token.' });
+    }
+    const user = await col.findOne({ _id: new ObjectId(req.user.userId) });
+    if (!user) {
+      return res.status(401).json({ error: 'Unauthorized. User not found.' });
+    }
+    res.json({ success: true, user: serializeUser(user) });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message || 'Could not load profile' });
+  }
+});
+
+/* ---------- Auth: Logout (client should discard token) ---------- */
+app.post('/api/auth/logout', (_req, res) => {
+  res.json({ success: true, message: 'Logged out. Please remove the token on the client.' });
+});
+
+/* ---------- Auth: Forgot password ---------- */
+app.post('/api/auth/forgot-password', async (req, res) => {
+  const genericMsg = 'If an account exists for this email, a password reset link has been sent.';
+  try {
+    const email = String((req.body || {}).email || '').trim().toLowerCase();
+    if (!email || !isValidEmail(email)) {
+      return res.status(400).json({ error: 'Valid email is required' });
+    }
+
+    const col = await usersCol();
+    const user = await col.findOne({ email });
+
+    // Always return the same response to avoid email enumeration
+    if (!user) {
+      return res.json({ success: true, message: genericMsg });
+    }
+
+    const rawToken = crypto.randomBytes(32).toString('hex');
+    const resetTokenHash = hashResetToken(rawToken);
+    const resetTokenExpires = new Date(Date.now() + 15 * 60 * 1000);
+
+    await col.updateOne(
+      { _id: user._id },
+      {
+        $set: {
+          resetTokenHash,
+          resetTokenExpires,
+          updatedAt: new Date(),
+        },
+      }
+    );
+
+    const resetUrl = `${FRONTEND_URL}/reset-password.html?token=${encodeURIComponent(rawToken)}`;
+
+    sendMail({
+      to: email,
+      subject: 'Reset your password — SHOEPHILE',
+      text: `You requested a password reset for your SHOEPHILE account.\n\nThis link expires in 15 minutes:\n${resetUrl}\n\nIf you did not request this, please ignore this email. Your password will remain unchanged.\n\nLove Affair with Shoes\nSHOEPHILE`,
+      html: `<div style="font-family:Georgia,serif;max-width:560px;margin:0 auto;color:#2A2425;">
+        <h2 style="font-weight:400;letter-spacing:0.04em;">SHOEPHILE</h2>
+        <p>You requested a password reset for your account.</p>
+        <p style="margin:1.5em 0;">
+          <a href="${escapeHtml(resetUrl)}" style="display:inline-block;background:#B97883;color:#fff;text-decoration:none;padding:12px 24px;border-radius:2px;font-size:14px;">Reset password</a>
+        </p>
+        <p style="font-size:0.9em;color:#7A6F6B;">This link expires in <strong>15 minutes</strong>.</p>
+        <p style="font-size:0.9em;color:#7A6F6B;">If you did not request a password reset, you can safely ignore this email. Your password will remain unchanged.</p>
+        <p style="margin-top:2em;font-size:0.85em;color:#7A6F6B;">Love Affair with Shoes<br>SHOEPHILE</p>
+      </div>`,
+    }).catch(console.error);
+
+    res.json({ success: true, message: genericMsg });
+  } catch (err) {
+    console.error(err);
+    // Still return generic message so callers cannot distinguish failures
+    res.json({ success: true, message: genericMsg });
+  }
+});
+
+/* ---------- Auth: Reset password ---------- */
+app.post('/api/auth/reset-password', async (req, res) => {
+  try {
+    const body = req.body || {};
+    const token = String(body.token || '').trim();
+    const password = String(body.password || '');
+    const confirmPassword = String(body.confirmPassword || '');
+
+    if (!token) {
+      return res.status(400).json({ error: 'Reset token is required' });
+    }
+    if (password.length < 8) {
+      return res.status(400).json({ error: 'Password must be at least 8 characters' });
+    }
+    if (password !== confirmPassword) {
+      return res.status(400).json({ error: 'Passwords do not match' });
+    }
+
+    const resetTokenHash = hashResetToken(token);
+    const col = await usersCol();
+    const user = await col.findOne({
+      resetTokenHash,
+      resetTokenExpires: { $gt: new Date() },
+    });
+
+    if (!user) {
+      return res.status(400).json({ error: 'Invalid or expired reset token' });
+    }
+
+    const passwordHash = await bcrypt.hash(password, 12);
+    await col.updateOne(
+      { _id: user._id },
+      {
+        $set: {
+          passwordHash,
+          resetTokenHash: null,
+          resetTokenExpires: null,
+          updatedAt: new Date(),
+        },
+      }
+    );
+
+    res.json({ success: true, message: 'Password has been reset successfully. You can now log in.' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message || 'Could not reset password' });
+  }
+});
+
+/* ---------- Customer order history ---------- */
+app.get('/api/my-orders', requireUser, async (req, res) => {
+  try {
+    if (!ObjectId.isValid(req.user.userId)) {
+      return res.status(401).json({ error: 'Unauthorized. Invalid token.' });
+    }
+    const col = await ordersCol();
+    const docs = await col
+      .find({ userId: new ObjectId(req.user.userId) })
+      .sort({ createdAt: -1 })
+      .toArray();
+    res.json(docs.map(serializeOrder));
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message || 'Could not load orders' });
+  }
+});
 
 /* ---------- Products ---------- */
 app.get('/api/products', async (_req, res) => {
@@ -517,7 +853,7 @@ app.get('/api/orders/:id', requireAdmin, async (req, res) => {
   }
 });
 
-app.post('/api/orders', async (req, res) => {
+app.post('/api/orders', optionalUser, async (req, res) => {
   try {
     const body = req.body || {};
     const rawItems = body.items || [];
@@ -656,6 +992,11 @@ app.post('/api/orders', async (req, res) => {
       total,
       notes: body.notes || '',
     };
+
+    // Link order to logged-in user when present (guest checkout still works)
+    if (req.user && req.user.userId && ObjectId.isValid(req.user.userId)) {
+      order.userId = new ObjectId(req.user.userId);
+    }
 
     const result = await col.insertOne(order);
     order._id = result.insertedId;
@@ -1394,6 +1735,7 @@ if (require.main === module) {
     console.log(`\n  SHOEPHILE running at http://localhost:${PORT}`);
     console.log(`  Admin: ${ADMIN_PASSWORD ? 'configured' : 'NOT SET — set ADMIN_PASSWORD'}; email filter: ${ADMIN_EMAIL || 'any'}`);
     console.log(`  MongoDB: ${MONGODB_URI ? 'URI set' : 'MISSING — set MONGODB_URI'}`);
+    console.log(`  JWT: ${JWT_SECRET ? 'configured' : 'NOT SET — set JWT_SECRET for customer auth'}`);
     console.log(`  Contact: ${CONTACT_EMAIL}\n`);
   });
 }

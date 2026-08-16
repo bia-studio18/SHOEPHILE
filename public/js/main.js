@@ -17,6 +17,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   initShopPage();
   initProductPage();
   renderHomeProducts();
+
+  // Auth
+  if (typeof Auth !== 'undefined') {
+    await Auth.init();
+  }
 });
 
 function initTheme() {
@@ -456,6 +461,24 @@ function initCheckoutPage() {
   const total = ckTotals.total;
   const freeShipping = !!ckTotals.freeShipping;
 
+  // Prefill from logged-in user if available
+  const user = (typeof Auth !== 'undefined') ? Auth.getCurrentUser() : null;
+  let prefillEmail = '';
+  let prefillPhone = '';
+  let prefillFirst = '';
+  let prefillLast = '';
+  if (user) {
+    prefillEmail = user.email || '';
+    if (user.phone) {
+      const digits = String(user.phone).replace(/\D/g, '');
+      prefillPhone = digits.startsWith('92') ? digits.slice(2) : (digits.startsWith('0') ? digits.slice(1) : digits);
+      if (prefillPhone.length > 10) prefillPhone = prefillPhone.slice(-10);
+    }
+    const parts = (user.name || '').trim().split(/\s+/);
+    prefillFirst = parts[0] || '';
+    prefillLast = parts.slice(1).join(' ') || '';
+  }
+
   container.innerHTML = `
     <div class="checkout-layout">
       <div class="checkout-form">
@@ -464,13 +487,13 @@ function initCheckoutPage() {
             <h2>Contact Information</h2>
             <div class="form-group">
               <label for="email">Email Address</label>
-              <input type="email" id="email" name="email" required placeholder="you@example.com">
+              <input type="email" id="email" name="email" required placeholder="you@example.com" value="${prefillEmail}" autocomplete="email">
             </div>
             <div class="form-group">
               <label for="phone">Phone Number (Pakistan)</label>
               <div class="phone-input-wrap">
                 <span class="phone-prefix">+92</span>
-                <input type="tel" id="phone" name="phone" inputmode="numeric" pattern="[0-9]{10}" maxlength="10" placeholder="3XXXXXXXXX" required>
+                <input type="tel" id="phone" name="phone" inputmode="numeric" pattern="[0-9]{10}" maxlength="10" placeholder="3XXXXXXXXX" required value="${prefillPhone}" autocomplete="tel-national">
               </div>
               <small style="color:var(--muted);font-size:0.75rem;">Enter 10 digits without leading 0 (e.g. 3001234567)</small>
             </div>
@@ -480,16 +503,16 @@ function initCheckoutPage() {
             <div class="form-row">
               <div class="form-group">
                 <label for="firstName">First Name</label>
-                <input type="text" id="firstName" name="firstName" required>
+                <input type="text" id="firstName" name="firstName" required value="${prefillFirst}" autocomplete="given-name">
               </div>
               <div class="form-group">
                 <label for="lastName">Last Name</label>
-                <input type="text" id="lastName" name="lastName" required>
+                <input type="text" id="lastName" name="lastName" required value="${prefillLast}" autocomplete="family-name">
               </div>
             </div>
             <div class="form-group">
               <label for="address">Address</label>
-              <input type="text" id="address" name="address" required placeholder="Street address">
+              <input type="text" id="address" name="address" required placeholder="Street address" autocomplete="street-address">
             </div>
             <div class="form-group">
               <label for="apartment">Apartment, suite, etc. (optional)</label>
@@ -646,7 +669,6 @@ function initCheckoutPage() {
       }
       window.__appliedCoupon = data.code;
       if (msg) { msg.style.color = 'var(--success)'; msg.textContent = `Applied: ${data.message} (−${formatPrice(data.discount)})`; }
-      // Refresh totals display if summary exists
       const t = Cart.getOrderTotals(data.discount || 0);
       const totalBtn = container.querySelector('button[type="submit"]');
       if (totalBtn) totalBtn.textContent = `Place Order — ${formatPrice(t.total)}`;
@@ -684,10 +706,17 @@ function initCheckoutPage() {
       shippingFee: shipping,
       total
     };
+
+    const headers = { 'Content-Type': 'application/json' };
+    if (typeof Auth !== 'undefined' && Auth.isLoggedIn()) {
+      const token = Auth.getAuthToken();
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+    }
+
     try {
       const res = await fetch('/api/orders', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(payload)
       });
       const data = await res.json();
@@ -713,6 +742,7 @@ function initCheckoutPage() {
     }
   });
 }
+
 function renderHomeProducts() {
   const newArrivals = document.getElementById('new-arrivals-grid');
   const featured = document.getElementById('featured-grid');
@@ -741,4 +771,34 @@ function renderHomeProducts() {
     if (list.length) bindProductEvents(bestsellers);
   }
   initFadeIn();
+}
+
+/* =========================================
+   SHOEPHILE — Announcement Bar Rotation
+   ========================================= */
+
+const announcements = [
+  "NEW ARRIVALS — SHOP NOW",
+  "FREE SHIPPING ABOVE PKR 3,000",
+  "10 DAYS EASY EXCHANGE"
+];
+
+let announcementIndex = 0;
+const announcementText = document.getElementById("announcementText");
+
+if (announcementText) {
+  setInterval(() => {
+    announcementText.classList.remove("fade-in");
+    announcementText.classList.add("fade-out");
+
+    setTimeout(() => {
+      announcementIndex = (announcementIndex + 1) % announcements.length;
+      announcementText.textContent = announcements[announcementIndex];
+      announcementText.classList.remove("fade-out");
+      announcementText.classList.add("fade-in");
+      setTimeout(() => {
+        announcementText.classList.remove("fade-in");
+      }, 400);
+    }, 400);
+  }, 3500);
 }
