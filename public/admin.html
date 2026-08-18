@@ -184,11 +184,7 @@
                   <div class="color-preview-row" id="color-preview-row" style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.5rem;align-items:center;"></div>
                   <small style="color:var(--muted);font-size:0.7rem;display:block;margin-top:0.35rem;">Enter color names only — HEX is assigned automatically. Preview appears below.</small>
                 </div>
-                <div class="form-group">
-                  <label>Stock (JSON: color → size → qty)</label>
-                  <textarea id="p-stock" rows="3" placeholder='{"Black":{"36":5,"37":5,"38":5,"39":5,"40":5,"41":5},"Ivory":{"36":3,"37":3,"38":3,"39":3,"40":3,"41":3}}'></textarea>
-                  <small style="color:var(--muted);font-size:0.7rem;display:block;margin-top:0.35rem;">Optional. Example: {"Black":{"36":2,"37":5}}. Leave empty if not tracking stock yet.</small>
-                </div>
+              
                 <div class="form-group">
                   <label>Description</label>
                   <textarea id="p-description"></textarea>
@@ -434,14 +430,7 @@
                   <input type="text" id="about-pillars-heading">
                 </div>
               </div>
-              <div id="pillars-editor" style="margin:1rem 0;"></div>
-              <button type="button" class="btn btn-outline" id="add-pillar-btn" style="margin-bottom:1rem;">+ Add Pillar</button>
-              <div style="display:flex;gap:0.75rem;margin-top:0.5rem;">
-                <button type="submit" class="btn btn-primary" style="flex:1;">Save Changes</button>
-                <button type="button" class="btn btn-outline" id="about-content-reload">Reload</button>
-              </div>
-              <p id="about-content-msg" style="font-size:0.85rem;margin-top:0.75rem;"></p>
-            </form>
+              
           </div>
         </div>
       </div>
