@@ -502,7 +502,7 @@ a.logo img.shoephile-logo {
 
 /* Hero */
 .hero {
-  position: relative; height: 100vh; min-height: 700px;
+  position: relative; height: 420px ; min-height: 350px;
   display: flex; align-items: center; justify-content: center; overflow: hidden;
 }
 .hero-image { position: absolute; inset: 0; z-index: 0; }
@@ -917,7 +917,7 @@ a.logo img.shoephile-logo {
 }
 @media (max-width: 768px) {
   :root { --nav-h: 80px; --space-2xl: 4rem; }
-  .hero { min-height: 600px; }
+  .hero { min-height: 350px; }
   .hero-ctas { flex-direction: column; align-items: center; }
   .hero-ctas .btn { width: 100%; max-width: 260px; }
   .cart-item { grid-template-columns: 90px 1fr; }
@@ -1168,190 +1168,7 @@ body {
     top: var(--announcement-h);
   }
 }
-/* ============================================
-   AUTH PAGES & ACCOUNT
-   ============================================ */
 
-.auth-page {
-  min-height: calc(100vh - var(--nav-h) - 120px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-xl) var(--space-md);
-}
-
-.auth-card {
-  width: 100%;
-  max-width: 420px;
-  background: var(--white);
-  border: 1px solid var(--border);
-  padding: var(--space-xl) var(--space-lg);
-}
-
-.auth-title {
-  font-size: clamp(1.75rem, 3vw, 2.25rem);
-  margin-bottom: 0.35rem;
-}
-
-.auth-subtitle {
-  color: var(--muted);
-  font-size: 0.95rem;
-  margin-bottom: var(--space-lg);
-}
-
-.auth-error {
-  color: var(--error);
-  font-size: 0.85rem;
-  margin-bottom: 1rem;
-}
-
-.auth-success {
-  color: var(--success);
-  font-size: 0.85rem;
-  margin-bottom: 1rem;
-}
-
-.auth-switch {
-  text-align: center;
-  margin-top: var(--space-lg);
-  font-size: 0.9rem;
-  color: var(--muted);
-}
-
-.auth-switch a {
-  color: var(--black);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.auth-links-row {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 1rem;
-}
-
-.password-wrap {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.password-wrap input {
-  width: 100%;
-  padding-right: 2.75rem;
-}
-
-.password-toggle {
-  position: absolute;
-  right: 0.75rem;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--muted);
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-
-.password-toggle:hover {
-  color: var(--black);
-}
-
-.password-strength {
-  font-size: 0.7rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  margin-top: 0.35rem;
-  color: var(--muted);
-  min-height: 1em;
-}
-
-.password-strength[data-score="1"] { color: var(--error); }
-.password-strength[data-score="2"] { color: #b08d3c; }
-.password-strength[data-score="3"] { color: var(--success); }
-.password-strength[data-score="4"] { color: var(--success); }
-
-/* Auth navbar area */
-.auth-area {
-  display: flex;
-  align-items: center;
-}
-
-.auth-greeting {
-  font-size: 0.7rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.auth-dropdown {
-  position: relative;
-}
-
-.auth-menu {
-  position: absolute;
-  top: calc(100% + 6px);
-  right: 0;
-  min-width: 180px;
-  background: var(--white);
-  border: 1px solid var(--border);
-  padding: 0.5rem 0;
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(-6px);
-  transition: all var(--transition);
-  z-index: 1200;
-  box-shadow: var(--shadow);
-}
-
-.auth-dropdown.open .auth-menu {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
-}
-
-.auth-menu a,
-.auth-menu button {
-  display: block;
-  width: 100%;
-  text-align: left;
-  padding: 0.65rem 1.1rem;
-  font-size: 0.8rem;
-  letter-spacing: 0.06em;
-  color: var(--text);
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-family: inherit;
-}
-
-.auth-menu a:hover,
-.auth-menu button:hover {
-  background: var(--bg-alt);
-}
-
-.mobile-auth {
-  margin-top: var(--space-md);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
-  border-top: 1px solid var(--border);
-  padding-top: var(--space-md);
-}
-
-.mobile-auth a,
-.mobile-auth button {
-  font-family: var(--font-display);
-  font-size: 1.25rem;
-  color: var(--black);
-  background: none;
-  border: none;
-  text-align: left;
-  cursor: pointer;
-  padding: 0;
-}
 
 /* Account page */
 .account-layout {

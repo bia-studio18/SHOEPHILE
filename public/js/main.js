@@ -17,16 +17,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   initShopPage();
   initProductPage();
   renderHomeProducts();
-
-  // Auth
-  if (typeof Auth !== 'undefined') {
-    await Auth.init();
-  }
 });
 
 function initTheme() {
   const saved = localStorage.getItem('shoephile_theme') || 'light';
   document.documentElement.setAttribute('data-theme', saved);
+
   document.querySelectorAll('.theme-toggle').forEach(btn => {
     btn.addEventListener('click', () => {
       const current = document.documentElement.getAttribute('data-theme');
@@ -36,6 +32,7 @@ function initTheme() {
       updateThemeIcon(next);
     });
   });
+
   updateThemeIcon(saved);
 }
 
@@ -50,6 +47,7 @@ function updateThemeIcon(theme) {
 function initHeader() {
   const header = document.querySelector('.site-header');
   if (!header) return;
+
   const onScroll = () => header.classList.toggle('scrolled', window.scrollY > 20);
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
@@ -60,10 +58,20 @@ function initMobileNav() {
   const nav = document.querySelector('.mobile-nav');
   const overlay = document.querySelector('.mobile-overlay');
   const closeBtn = document.querySelector('.mobile-nav-close');
+
   if (!btn || !nav) return;
 
-  const open = () => { nav.classList.add('open'); overlay?.classList.add('open'); document.body.style.overflow = 'hidden'; };
-  const close = () => { nav.classList.remove('open'); overlay?.classList.remove('open'); document.body.style.overflow = ''; };
+  const open = () => {
+    nav.classList.add('open');
+    overlay?.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  };
+
+  const close = () => {
+    nav.classList.remove('open');
+    overlay?.classList.remove('open');
+    document.body.style.overflow = '';
+  };
 
   btn.addEventListener('click', open);
   closeBtn?.addEventListener('click', close);
@@ -76,15 +84,25 @@ function initSearch() {
   const overlay = document.querySelector('.search-overlay');
   const closeBtn = document.querySelector('.search-close');
   const input = document.querySelector('.search-input');
+
   if (!overlay) return;
 
-  openBtns.forEach(btn => btn.addEventListener('click', () => {
-    overlay.classList.add('open');
-    setTimeout(() => input?.focus(), 100);
-  }));
+  openBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      overlay.classList.add('open');
+      setTimeout(() => input?.focus(), 100);
+    });
+  });
+
   closeBtn?.addEventListener('click', () => overlay.classList.remove('open'));
-  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') overlay.classList.remove('open'); });
+
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('open');
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') overlay.classList.remove('open');
+  });
 
   document.querySelector('.search-form')?.addEventListener('submit', e => {
     e.preventDefault();
@@ -96,6 +114,7 @@ function initSearch() {
 function initFadeIn() {
   const els = document.querySelectorAll('.fade-in');
   if (!els.length) return;
+
   const observer = new IntersectionObserver(entries => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -104,6 +123,7 @@ function initFadeIn() {
       }
     });
   }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
   els.forEach(el => observer.observe(el));
 }
 
@@ -118,15 +138,19 @@ function initNewsletterPopup() {
     popup.classList.remove('open');
     sessionStorage.setItem('shoephile_popup_dismissed', '1');
   });
+
   popup.addEventListener('click', e => {
     if (e.target === popup) {
       popup.classList.remove('open');
       sessionStorage.setItem('shoephile_popup_dismissed', '1');
     }
   });
+
   popup.querySelector('form')?.addEventListener('submit', e => {
     e.preventDefault();
-    Cart.showToast('Thank you for subscribing');
+    if (typeof Cart !== 'undefined' && Cart.showToast) {
+      Cart.showToast('Thank you for subscribing');
+    }
     popup.classList.remove('open');
     sessionStorage.setItem('shoephile_popup_dismissed', '1');
   });
@@ -149,6 +173,7 @@ function initNewsletterForms() {
       e.preventDefault();
       const input = form.querySelector('input[type="email"]');
       const email = input ? input.value.trim() : '';
+
       try {
         const res = await fetch('/api/newsletter', {
           method: 'POST',
@@ -157,26 +182,36 @@ function initNewsletterForms() {
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Failed');
-        Cart.showToast(data.message || 'Thank you for subscribing');
+
+        if (typeof Cart !== 'undefined' && Cart.showToast) {
+          Cart.showToast(data.message || 'Thank you for subscribing');
+        }
         form.reset();
       } catch (err) {
-        Cart.showToast(err.message || 'Could not subscribe');
+        if (typeof Cart !== 'undefined' && Cart.showToast) {
+          Cart.showToast(err.message || 'Could not subscribe');
+        }
       }
     });
   });
 }
 
 function createProductCard(product) {
-  const inWish = Cart.isInWishlist(product.id);
+  const inWish = typeof Cart !== 'undefined' && Cart.isInWishlist
+    ? Cart.isInWishlist(product.id)
+    : false;
+
   return `
     <article class="product-card fade-in" data-id="${product.id}">
       <div class="product-image-wrap">
         ${product.badge ? `<span class="product-badge">${product.badge}</span>` : ''}
         <button class="product-wishlist ${inWish ? 'active' : ''}" data-wishlist="${product.id}" aria-label="Add to wishlist">
-          <svg class="icon-sm" viewBox="0 0 24 24" ${inWish ? 'fill="currentColor"' : ''}><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          <svg class="icon-sm" viewBox="0 0 24 24" ${inWish ? 'fill="currentColor"' : ''}>
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
         </button>
         <a href="product.html?id=${product.id}">
-          <img src="${productImageUrl((product.images&&product.images[0])||'')}" alt="${product.name}" loading="lazy">
+          <img src="${productImageUrl((product.images && product.images[0]) || '')}" alt="${product.name}" loading="lazy">
         </a>
         <div class="product-actions">
           <button class="btn btn-primary btn-sm" data-quick-add="${product.id}">Add to Bag</button>
@@ -193,22 +228,29 @@ function createProductCard(product) {
 }
 
 function bindProductEvents(container) {
+  if (!container) return;
+
   container.querySelectorAll('[data-wishlist]').forEach(btn => {
     btn.addEventListener('click', e => {
       e.preventDefault();
       e.stopPropagation();
-      const id = parseInt(btn.dataset.wishlist);
+      const id = parseInt(btn.dataset.wishlist, 10);
+      if (typeof Cart === 'undefined' || !Cart.toggleWishlist) return;
+
       const active = Cart.toggleWishlist(id);
       btn.classList.toggle('active', active);
       const svg = btn.querySelector('svg');
       if (svg) svg.setAttribute('fill', active ? 'currentColor' : 'none');
     });
   });
+
   container.querySelectorAll('[data-quick-add]').forEach(btn => {
     btn.addEventListener('click', e => {
       e.preventDefault();
       e.stopPropagation();
-      Cart.addToCart(parseInt(btn.dataset.quickAdd));
+      if (typeof Cart !== 'undefined' && Cart.addToCart) {
+        Cart.addToCart(parseInt(btn.dataset.quickAdd, 10));
+      }
     });
   });
 }
@@ -223,22 +265,29 @@ function initShopPage() {
   const searchQuery = urlParams.get('search');
 
   function render() {
-    let products = filterProducts(currentCategory, currentSort);
+    let products = typeof filterProducts === 'function'
+      ? filterProducts(currentCategory, currentSort)
+      : (window.PRODUCTS || []);
+
     if (searchQuery) {
+      const q = searchQuery.toLowerCase();
       products = products.filter(p =>
-        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.category.toLowerCase().includes(searchQuery.toLowerCase())
+        p.name.toLowerCase().includes(q) ||
+        p.category.toLowerCase().includes(q)
       );
     }
+
     grid.innerHTML = products.length
       ? products.map(createProductCard).join('')
       : '<p class="text-center text-muted" style="grid-column:1/-1;padding:4rem 0;">No products found.</p>';
+
     bindProductEvents(grid);
     initFadeIn();
   }
 
   document.querySelectorAll('.filter-btn').forEach(btn => {
     if (btn.dataset.category === currentCategory) btn.classList.add('active');
+
     btn.addEventListener('click', () => {
       document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
@@ -260,15 +309,19 @@ function initProductPage() {
   if (!container) return;
 
   const id = new URLSearchParams(window.location.search).get('id') || '1';
-  const product = getProductById(id);
+  const product = typeof getProductById === 'function' ? getProductById(id) : null;
 
   if (!product) {
-    container.innerHTML = '<div class="container text-center" style="padding:6rem 0;"><h2>Product not found</h2><a href="shop.html" class="btn btn-primary" style="margin-top:1.5rem;">Back to Shop</a></div>';
+    container.innerHTML = `
+      <div class="container text-center" style="padding:6rem 0;">
+        <h2>Product not found</h2>
+        <a href="shop.html" class="btn btn-primary" style="margin-top:1.5rem;">Back to Shop</a>
+      </div>`;
     return;
   }
 
   let selectedSize = product.sizes[2] || product.sizes[0];
-  let selectedColor = product.colors[0].name;
+  let selectedColor = product.colors[0]?.name || '';
   let currentImage = 0;
 
   function render() {
@@ -316,11 +369,13 @@ function initProductPage() {
               <button class="btn btn-primary" id="add-to-cart-btn">Add to Bag</button>
               <button class="btn btn-outline" id="buy-now-btn">Buy Now</button>
               <button class="btn btn-ghost" id="wishlist-btn" aria-label="Wishlist">
-                <svg class="icon" viewBox="0 0 24 24" ${Cart.isInWishlist(product.id) ? 'fill="currentColor"' : ''}><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                <svg class="icon" viewBox="0 0 24 24" ${typeof Cart !== 'undefined' && Cart.isInWishlist && Cart.isInWishlist(product.id) ? 'fill="currentColor"' : ''}>
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
               </button>
             </div>
             <div class="product-meta">
-              <span>${product.details}</span>
+              <span>${product.details || ''}</span>
               <span>Standard shipping PKR 300 across Pakistan</span>
               <span>Returns within 30 days</span>
             </div>
@@ -334,33 +389,54 @@ function initProductPage() {
     `;
 
     container.querySelectorAll('.gallery-thumb').forEach(thumb => {
-      thumb.addEventListener('click', () => { currentImage = parseInt(thumb.dataset.index); render(); });
-    });
-    container.querySelectorAll('.color-btn').forEach(btn => {
-      btn.addEventListener('click', () => { selectedColor = btn.dataset.color; render(); });
-    });
-    container.querySelectorAll('.size-btn').forEach(btn => {
-      btn.addEventListener('click', () => { selectedSize = parseInt(btn.dataset.size); render(); });
-    });
-    container.querySelector('#add-to-cart-btn')?.addEventListener('click', () => {
-      Cart.addToCart(product.id, selectedSize, selectedColor);
-    });
-    container.querySelector('#buy-now-btn')?.addEventListener('click', () => {
-      Cart.addToCart(product.id, selectedSize, selectedColor);
-      window.location.href = 'checkout.html';
-    });
-    container.querySelector('#wishlist-btn')?.addEventListener('click', () => {
-      Cart.toggleWishlist(product.id);
-      render();
+      thumb.addEventListener('click', () => {
+        currentImage = parseInt(thumb.dataset.index, 10);
+        render();
+      });
     });
 
-    const related = PRODUCTS.filter(p => p.category === product.category && p.id !== product.id).slice(0, 4);
+    container.querySelectorAll('.color-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedColor = btn.dataset.color;
+        render();
+      });
+    });
+
+    container.querySelectorAll('.size-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedSize = parseInt(btn.dataset.size, 10);
+        render();
+      });
+    });
+
+    container.querySelector('#add-to-cart-btn')?.addEventListener('click', () => {
+      if (typeof Cart !== 'undefined' && Cart.addToCart) {
+        Cart.addToCart(product.id, selectedSize, selectedColor);
+      }
+    });
+
+    container.querySelector('#buy-now-btn')?.addEventListener('click', () => {
+      if (typeof Cart !== 'undefined' && Cart.addToCart) {
+        Cart.addToCart(product.id, selectedSize, selectedColor);
+        window.location.href = 'checkout.html';
+      }
+    });
+
+    container.querySelector('#wishlist-btn')?.addEventListener('click', () => {
+      if (typeof Cart !== 'undefined' && Cart.toggleWishlist) {
+        Cart.toggleWishlist(product.id);
+        render();
+      }
+    });
+
+    const related = (window.PRODUCTS || []).filter(p => p.category === product.category && p.id !== product.id).slice(0, 4);
     const relatedGrid = container.querySelector('#related-grid');
     if (relatedGrid) {
       relatedGrid.innerHTML = related.map(createProductCard).join('');
       bindProductEvents(relatedGrid);
     }
   }
+
   render();
 }
 
@@ -369,6 +445,8 @@ function initCartPage() {
   if (!container) return;
 
   function render() {
+    if (typeof Cart === 'undefined') return;
+
     const cart = Cart.getCart();
     if (cart.length === 0) {
       container.innerHTML = `
@@ -380,12 +458,17 @@ function initCartPage() {
       return;
     }
 
-    const totals = (typeof Cart.getOrderTotals === 'function') ? Cart.getOrderTotals(0) : { subtotal: Cart.getCartTotal(), shippingFee: 300, total: Cart.getCartTotal() + 300, freeShipping: false, amountToFreeShipping: 0 };
-    const subtotal = totals.subtotal;
-    const shipping = totals.shippingFee;
-    const total = totals.total;
-    const freeShipping = !!totals.freeShipping;
-    const amountToFreeShipping = totals.amountToFreeShipping || 0;
+    const totals = (typeof Cart.getOrderTotals === 'function')
+      ? Cart.getOrderTotals(0)
+      : {
+          subtotal: Cart.getCartTotal(),
+          shippingFee: 300,
+          total: Cart.getCartTotal() + 300,
+          freeShipping: false,
+          amountToFreeShipping: 0
+        };
+
+    const { subtotal, shippingFee: shipping, total, freeShipping, amountToFreeShipping = 0 } = totals;
 
     container.innerHTML = `
       <div class="cart-layout">
@@ -414,7 +497,9 @@ function initCartPage() {
           <div class="summary-row"><span>Subtotal</span><span>${formatPrice(subtotal)}</span></div>
           <div class="summary-row"><span>Shipping</span><span>${freeShipping ? '<span style="color:var(--success)">FREE</span>' : formatPrice(shipping)}</span></div>
           <div class="summary-row total"><span>Total</span><span>${formatPrice(total)}</span></div>
-          ${!freeShipping && amountToFreeShipping > 0 ? `<p style="font-size:0.8rem;color:var(--rose);margin:0.75rem 0;text-align:center;">Add ${formatPrice(amountToFreeShipping)} more for free shipping</p>` : ''}
+          ${!freeShipping && amountToFreeShipping > 0
+            ? `<p style="font-size:0.8rem;color:var(--rose);margin:0.75rem 0;text-align:center;">Add ${formatPrice(amountToFreeShipping)} more for free shipping</p>`
+            : ''}
           <a href="checkout.html" class="btn btn-primary btn-full">Proceed to Checkout</a>
           <a href="shop.html" class="btn btn-ghost btn-full" style="margin-top:0.75rem;text-align:center;">Continue Shopping</a>
           <p style="font-size:0.75rem;color:var(--muted);margin-top:1rem;text-align:center;">Shipping PKR 300 · Free above PKR 3,000</p>
@@ -423,26 +508,30 @@ function initCartPage() {
 
     container.querySelectorAll('[data-action]').forEach(btn => {
       btn.addEventListener('click', () => {
-        const idx = parseInt(btn.dataset.index);
+        const idx = parseInt(btn.dataset.index, 10);
         const cart = Cart.getCart();
         const newQty = btn.dataset.action === 'inc' ? cart[idx].qty + 1 : cart[idx].qty - 1;
         Cart.updateQty(idx, newQty);
         render();
       });
     });
+
     container.querySelectorAll('[data-remove]').forEach(btn => {
       btn.addEventListener('click', () => {
-        Cart.removeFromCart(parseInt(btn.dataset.remove));
+        Cart.removeFromCart(parseInt(btn.dataset.remove, 10));
         render();
       });
     });
   }
+
   render();
 }
 
 function initCheckoutPage() {
   const container = document.getElementById('checkout-content');
   if (!container) return;
+
+  if (typeof Cart === 'undefined') return;
 
   const cart = Cart.getCart();
   if (cart.length === 0) {
@@ -455,29 +544,16 @@ function initCheckoutPage() {
     return;
   }
 
-  const ckTotals = (typeof Cart.getOrderTotals === 'function') ? Cart.getOrderTotals(0) : { subtotal: Cart.getCartTotal(), shippingFee: 300, total: Cart.getCartTotal() + 300, freeShipping: false };
-  const subtotal = ckTotals.subtotal;
-  const shipping = ckTotals.shippingFee;
-  const total = ckTotals.total;
-  const freeShipping = !!ckTotals.freeShipping;
+  const ckTotals = (typeof Cart.getOrderTotals === 'function')
+    ? Cart.getOrderTotals(0)
+    : {
+        subtotal: Cart.getCartTotal(),
+        shippingFee: 300,
+        total: Cart.getCartTotal() + 300,
+        freeShipping: false
+      };
 
-  // Prefill from logged-in user if available
-  const user = (typeof Auth !== 'undefined') ? Auth.getCurrentUser() : null;
-  let prefillEmail = '';
-  let prefillPhone = '';
-  let prefillFirst = '';
-  let prefillLast = '';
-  if (user) {
-    prefillEmail = user.email || '';
-    if (user.phone) {
-      const digits = String(user.phone).replace(/\D/g, '');
-      prefillPhone = digits.startsWith('92') ? digits.slice(2) : (digits.startsWith('0') ? digits.slice(1) : digits);
-      if (prefillPhone.length > 10) prefillPhone = prefillPhone.slice(-10);
-    }
-    const parts = (user.name || '').trim().split(/\s+/);
-    prefillFirst = parts[0] || '';
-    prefillLast = parts.slice(1).join(' ') || '';
-  }
+  const { subtotal, shippingFee: shipping, total, freeShipping } = ckTotals;
 
   container.innerHTML = `
     <div class="checkout-layout">
@@ -487,32 +563,33 @@ function initCheckoutPage() {
             <h2>Contact Information</h2>
             <div class="form-group">
               <label for="email">Email Address</label>
-              <input type="email" id="email" name="email" required placeholder="you@example.com" value="${prefillEmail}" autocomplete="email">
+              <input type="email" id="email" name="email" required placeholder="you@example.com">
             </div>
             <div class="form-group">
               <label for="phone">Phone Number (Pakistan)</label>
               <div class="phone-input-wrap">
                 <span class="phone-prefix">+92</span>
-                <input type="tel" id="phone" name="phone" inputmode="numeric" pattern="[0-9]{10}" maxlength="10" placeholder="3XXXXXXXXX" required value="${prefillPhone}" autocomplete="tel-national">
+                <input type="tel" id="phone" name="phone" inputmode="numeric" pattern="[0-9]{10}" maxlength="10" placeholder="3XXXXXXXXX" required>
               </div>
               <small style="color:var(--muted);font-size:0.75rem;">Enter 10 digits without leading 0 (e.g. 3001234567)</small>
             </div>
           </div>
+
           <div class="form-section">
             <h2>Shipping Address</h2>
             <div class="form-row">
               <div class="form-group">
                 <label for="firstName">First Name</label>
-                <input type="text" id="firstName" name="firstName" required value="${prefillFirst}" autocomplete="given-name">
+                <input type="text" id="firstName" name="firstName" required>
               </div>
               <div class="form-group">
                 <label for="lastName">Last Name</label>
-                <input type="text" id="lastName" name="lastName" required value="${prefillLast}" autocomplete="family-name">
+                <input type="text" id="lastName" name="lastName" required>
               </div>
             </div>
             <div class="form-group">
               <label for="address">Address</label>
-              <input type="text" id="address" name="address" required placeholder="Street address" autocomplete="street-address">
+              <input type="text" id="address" name="address" required placeholder="Street address">
             </div>
             <div class="form-group">
               <label for="apartment">Apartment, suite, etc. (optional)</label>
@@ -557,13 +634,8 @@ function initCheckoutPage() {
               </div>
               <p id="coupon-message" style="font-size:0.8rem;margin-top:0.5rem;"></p>
             </div>
-            <div class="form-group" style="display:none;">
-              <label for="country-legacy">Country</label>
-              <select id="country-legacy">
-                <option value="Pakistan" selected>Pakistan</option>
-              </select>
-            </div>
           </div>
+
           <div class="form-section">
             <h2>Payment Method</h2>
             <div class="payment-options">
@@ -602,10 +674,12 @@ function initCheckoutPage() {
               Pay securely with NayaPay. After placing your order you will receive confirmation and payment instructions. NayaPay credentials are configured server-side and never exposed in the browser.
             </div>
           </div>
+
           <button type="submit" class="btn btn-primary btn-full">Place Order — ${formatPrice(total)}</button>
           <p style="font-size:0.75rem;color:var(--muted);text-align:center;margin-top:1rem;">Your payment information is encrypted and secure.</p>
         </form>
       </div>
+
       <div class="order-summary-box">
         <h3>Order Summary</h3>
         ${cart.map(item => `
@@ -630,12 +704,15 @@ function initCheckoutPage() {
   function updatePaymentUI(val) {
     ['card-fields', 'nayapay-info'].forEach(id => {
       const el = container.querySelector('#' + id);
-      if (el) el.classList.toggle('visible',
-        (id === 'card-fields' && val === 'card') ||
-        (id === 'nayapay-info' && val === 'nayapay')
-      );
+      if (el) {
+        el.classList.toggle('visible',
+          (id === 'card-fields' && val === 'card') ||
+          (id === 'nayapay-info' && val === 'nayapay')
+        );
+      }
     });
   }
+
   container.querySelectorAll('.payment-option').forEach(opt => {
     opt.addEventListener('click', () => {
       container.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
@@ -645,35 +722,52 @@ function initCheckoutPage() {
       updatePaymentUI(input?.value || 'cod');
     });
   });
+
   updatePaymentUI('cod');
 
   // Coupon apply
   container.querySelector('#apply-coupon-btn')?.addEventListener('click', async () => {
     const code = (container.querySelector('#couponCode')?.value || '').trim();
     const msg = container.querySelector('#coupon-message');
+
     if (!code) {
       if (msg) msg.textContent = 'Enter a coupon code.';
       return;
     }
+
     try {
       const res = await fetch('/api/coupons/validate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code, subtotal: Cart.getCartTotal() }),
+        body: JSON.stringify({ code, subtotal: Cart.getCartTotal() })
       });
       const data = await res.json();
+
       if (!res.ok || !data.valid) {
         window.__appliedCoupon = null;
-        if (msg) { msg.style.color = 'var(--error)'; msg.textContent = data.error || 'Invalid coupon'; }
+        if (msg) {
+          msg.style.color = 'var(--error)';
+          msg.textContent = data.error || 'Invalid coupon';
+        }
         return;
       }
+
       window.__appliedCoupon = data.code;
-      if (msg) { msg.style.color = 'var(--success)'; msg.textContent = `Applied: ${data.message} (−${formatPrice(data.discount)})`; }
-      const t = Cart.getOrderTotals(data.discount || 0);
-      const totalBtn = container.querySelector('button[type="submit"]');
-      if (totalBtn) totalBtn.textContent = `Place Order — ${formatPrice(t.total)}`;
+      if (msg) {
+        msg.style.color = 'var(--success)';
+        msg.textContent = `Applied: ${data.message} (−${formatPrice(data.discount)})`;
+      }
+
+      if (typeof Cart.getOrderTotals === 'function') {
+        const t = Cart.getOrderTotals(data.discount || 0);
+        const totalBtn = container.querySelector('button[type="submit"]');
+        if (totalBtn) totalBtn.textContent = `Place Order — ${formatPrice(t.total)}`;
+      }
     } catch (err) {
-      if (msg) { msg.style.color = 'var(--error)'; msg.textContent = 'Could not validate coupon.'; }
+      if (msg) {
+        msg.style.color = 'var(--error)';
+        msg.textContent = 'Could not validate coupon.';
+      }
     }
   });
 
@@ -681,16 +775,22 @@ function initCheckoutPage() {
     e.preventDefault();
     const form = e.target;
     const payment = form.querySelector('input[name="payment"]:checked')?.value || 'cod';
+
+    let phoneValue;
+    try {
+      const digits = (form.phone?.value || '').replace(/\D/g, '');
+      if (!/^3\d{9}$/.test(digits)) {
+        alert('Please enter a valid Pakistani mobile number (10 digits starting with 3).');
+        return;
+      }
+      phoneValue = '+92' + digits;
+    } catch {
+      return;
+    }
+
     const payload = {
       email: form.email?.value?.trim(),
-      phone: (() => {
-        const digits = (form.phone?.value || '').replace(/\D/g, '');
-        if (!/^3\d{9}$/.test(digits)) {
-          alert('Please enter a valid Pakistani mobile number (10 digits starting with 3).');
-          throw new Error('Invalid phone');
-        }
-        return '+92' + digits;
-      })(),
+      phone: phoneValue,
       firstName: form.firstName?.value?.trim(),
       lastName: form.lastName?.value?.trim() || '',
       address: form.address?.value?.trim() || '',
@@ -707,23 +807,19 @@ function initCheckoutPage() {
       total
     };
 
-    const headers = { 'Content-Type': 'application/json' };
-    if (typeof Auth !== 'undefined' && Auth.isLoggedIn()) {
-      const token = Auth.getAuthToken();
-      if (token) headers['Authorization'] = `Bearer ${token}`;
-    }
-
     try {
       const res = await fetch('/api/orders', {
         method: 'POST',
-        headers,
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Order failed');
+
       Cart.clearCart();
       const on = data.order?.orderNumber || '';
       const when = data.order?.createdAtLocal || '';
+
       container.innerHTML = `
         <div class="empty-cart" style="max-width:500px;margin:0 auto;">
           <h2>Thank You</h2>
@@ -736,7 +832,8 @@ function initCheckoutPage() {
             <a href="index.html" class="btn btn-outline">Return Home</a>
           </div>
         </div>`;
-      Cart.updateBadges();
+
+      if (Cart.updateBadges) Cart.updateBadges();
     } catch (err) {
       alert(err.message || 'Could not place order. Please try again.');
     }
@@ -747,36 +844,39 @@ function renderHomeProducts() {
   const newArrivals = document.getElementById('new-arrivals-grid');
   const featured = document.getElementById('featured-grid');
   const bestsellers = document.getElementById('bestsellers-grid');
+  const products = window.PRODUCTS || [];
 
   if (newArrivals) {
-    const items = PRODUCTS.filter(p => p.isNew || p.badge === 'New' || p.badge === 'Luxury').slice(0, 4);
-    const list = items.length ? items : PRODUCTS.slice(0, 4);
+    const items = products.filter(p => p.isNew || p.badge === 'New' || p.badge === 'Luxury').slice(0, 4);
+    const list = items.length ? items : products.slice(0, 4);
     newArrivals.innerHTML = list.length
       ? list.map(createProductCard).join('')
       : '<p class="text-center text-muted" style="grid-column:1/-1;">No products yet. Add items from Admin.</p>';
     bindProductEvents(newArrivals);
   }
+
   if (featured) {
-    const items = PRODUCTS.filter(p => p.featured).slice(0, 4);
-    const list = items.length ? items : PRODUCTS.slice(0, 4);
+    const items = products.filter(p => p.featured).slice(0, 4);
+    const list = items.length ? items : products.slice(0, 4);
     featured.innerHTML = list.length
       ? list.map(createProductCard).join('')
       : '<p class="text-center text-muted" style="grid-column:1/-1;">No products yet.</p>';
     bindProductEvents(featured);
   }
+
   if (bestsellers) {
-    const items = PRODUCTS.filter(p => p.isBestSeller || p.badge === 'Bestseller').slice(0, 4);
-    const list = items.length ? items : PRODUCTS.slice(0, 4);
+    const items = products.filter(p => p.isBestSeller || p.badge === 'Bestseller').slice(0, 4);
+    const list = items.length ? items : products.slice(0, 4);
     bestsellers.innerHTML = list.length ? list.map(createProductCard).join('') : '';
     if (list.length) bindProductEvents(bestsellers);
   }
+
   initFadeIn();
 }
 
 /* =========================================
    SHOEPHILE — Announcement Bar Rotation
    ========================================= */
-
 const announcements = [
   "NEW ARRIVALS — SHOP NOW",
   "FREE SHIPPING ABOVE PKR 3,000",
@@ -794,8 +894,10 @@ if (announcementText) {
     setTimeout(() => {
       announcementIndex = (announcementIndex + 1) % announcements.length;
       announcementText.textContent = announcements[announcementIndex];
+
       announcementText.classList.remove("fade-out");
       announcementText.classList.add("fade-in");
+
       setTimeout(() => {
         announcementText.classList.remove("fade-in");
       }, 400);
