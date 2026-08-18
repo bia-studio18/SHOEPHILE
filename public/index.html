@@ -109,7 +109,8 @@
   <!-- Hero (CMS-driven) -->
   <section class="hero">
     <div class="hero-image">
-     </div>
+      <img id="hero-image" src="" alt="SHOEPHILE" style="display:none;" />
+    </div>
     <div class="hero-overlay"></div>
     <div class="hero-content">
       <p class="section-label" id="hero-eyebrow" style="color:rgba(255,255,255,0.85);letter-spacing:0.3em;">Premium Women's Flats</p>
@@ -283,7 +284,11 @@
         if (!res.ok) return;
         const c = await res.json();
         const img = document.getElementById('hero-image');
-        if (img && c.heroImage) { img.src = c.heroImage; img.alt = c.heading || 'SHOEPHILE'; }
+        if (img && c.heroImage) {
+          img.src = c.heroImage;
+          img.alt = c.heading || 'SHOEPHILE';
+          img.style.display = '';
+        }
         const eye = document.getElementById('hero-eyebrow');
         if (eye && c.eyebrow) eye.textContent = c.eyebrow;
         const h = document.getElementById('hero-heading');

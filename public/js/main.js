@@ -267,7 +267,7 @@ function initShopPage() {
   function render() {
     let products = typeof filterProducts === 'function'
       ? filterProducts(currentCategory, currentSort)
-      : (window.PRODUCTS || []);
+      : ((typeof PRODUCTS !== 'undefined' ? PRODUCTS : null) || window.PRODUCTS || []);
 
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
@@ -429,7 +429,7 @@ function initProductPage() {
       }
     });
 
-    const related = (window.PRODUCTS || []).filter(p => p.category === product.category && p.id !== product.id).slice(0, 4);
+       const related = ((typeof PRODUCTS !== 'undefined' ? PRODUCTS : null) || window.PRODUCTS || []).filter(p => p.category === product.category && p.id !== product.id).slice(0, 4);
     const relatedGrid = container.querySelector('#related-grid');
     if (relatedGrid) {
       relatedGrid.innerHTML = related.map(createProductCard).join('');
@@ -844,7 +844,9 @@ function renderHomeProducts() {
   const newArrivals = document.getElementById('new-arrivals-grid');
   const featured = document.getElementById('featured-grid');
   const bestsellers = document.getElementById('bestsellers-grid');
-  const products = window.PRODUCTS || [];
+    const products = (typeof PRODUCTS !== 'undefined' && PRODUCTS.length)
+    ? PRODUCTS
+    : (window.PRODUCTS || []);
 
   if (newArrivals) {
     const items = products.filter(p => p.isNew || p.badge === 'New' || p.badge === 'Luxury').slice(0, 4);

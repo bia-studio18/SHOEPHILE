@@ -4,7 +4,9 @@
 
 const API_BASE = '';
 
-let PRODUCTS = [];
+// Use var so PRODUCTS is available on window (needed by main.js renderHomeProducts / related products)
+var PRODUCTS = [];
+window.PRODUCTS = PRODUCTS;
 let productsReady = null;
 
 function formatPrice(price) {
@@ -24,10 +26,12 @@ async function fetchProducts() {
     const res = await fetch(API_BASE + '/api/products');
     if (!res.ok) throw new Error('Failed to load products');
     PRODUCTS = await res.json();
+    window.PRODUCTS = PRODUCTS;
     return PRODUCTS;
   } catch (e) {
     console.warn('API unavailable, empty catalog:', e.message);
     PRODUCTS = [];
+    window.PRODUCTS = PRODUCTS;
     return PRODUCTS;
   }
 }
