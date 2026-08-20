@@ -340,9 +340,15 @@ function createMailer() {
   const pass = process.env.SMTP_PASS;
   if (!pass) return null;
   return nodemailer.createTransport({
-    service: 'gmail',
-    auth: { user, pass },
-  });
+  service: 'gmail',
+  auth: {
+    user,
+    pass,
+  },
+  connectionTimeout: 15000,
+  greetingTimeout: 15000,
+  socketTimeout: 20000,
+});
 }
 
 async function sendMail({ to, subject, text, html }) {
@@ -1030,37 +1036,100 @@ app.post('/api/orders', optionalUser, async (req, res) => {
     const discountLine = discount > 0 ? `Discount (${couponCode}): -Rs ${discount}\n` : '';
     const shipLabel = shippingFee === 0 ? 'FREE' : `Rs ${shippingFee}`;
 
-    sendMail({
-      to: CONTACT_EMAIL,
-      subject: `[SHOEPHILE] New order ${order.orderNumber}`,
-      text: `New order ${order.orderNumber}
+    // Notify admin about new order
+try {
+  await sendMail({
+    to: CONTACT_EMAIL,
+    subject: `[SHOEPHILE] New order ${order.orderNumber}`,
+    text: `New order ${order.orderNumber}
+
 Date: ${order.createdAtLocal}
+
 Customer: ${order.customer.firstName} ${order.customer.lastName}
+
 Email: ${order.customer.email}
+
 Phone: ${order.customer.phone || '—'}
+
 Address: ${addr}
+
 Payment: ${order.payment}
+
 Products:
+
 ${itemsText}
+
 Subtotal: Rs ${order.subtotal}
+
 ${discountLine}Shipping: ${shipLabel}
+
 Total: Rs ${order.total}`,
-      html: `<h2>New order ${order.orderNumber}</h2>
-        <p><strong>Date:</strong> ${escapeHtml(order.createdAtLocal)}</p>
-        <p><strong>Customer:</strong> ${escapeHtml(order.customer.firstName + ' ' + (order.customer.lastName || ''))}</p>
-        <p><strong>Email:</strong> ${escapeHtml(order.customer.email)}</p>
-        <p><strong>Phone:</strong> ${escapeHtml(order.customer.phone || '—')}</p>
-        <p><strong>Address:</strong> ${escapeHtml(addr)}</p>
-        <p><strong>Payment Method:</strong> ${escapeHtml(order.payment)}</p>
-        <table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse;margin:1em 0;">
-          <thead><tr><th>Product</th><th>Size/Color</th><th>Qty</th><th>Line total</th></tr></thead>
-          <tbody>${itemsHtml}</tbody>
-        </table>
-        <p>Subtotal: Rs ${order.subtotal}<br>
-        ${discount > 0 ? `Discount (${escapeHtml(couponCode)}): -Rs ${discount}<br>` : ''}
-        Shipping: ${shipLabel}<br>
-        <strong>Total: Rs ${order.total}</strong></p>`,
-    }).catch(console.error);
+
+    html: `<div style="font-family:Arial,sans-serif;max-width:700px;margin:0 auto;color:#2A2425;">
+      <h2>New SHOEPHILE Order — ${escapeHtml(order.orderNumber)}</h2>
+
+      <p><strong>Date:</strong> ${escapeHtml(order.createdAtLocal)}</p>
+
+      <hr>
+
+      <p><strong>Customer:</strong> ${escapeHtml(
+        order.customer.firstName + ' ' + (order.customer.lastName || '')
+      )}</p>
+
+      <p><strong>Email:</strong> ${escapeHtml(order.customer.email)}</p>
+
+      <p><strong>Phone:</strong> ${escapeHtml(order.customer.phone || '—')}</p>
+
+      <p><strong>Address:</strong> ${escapeHtml(addr)}</p>
+
+      <p><strong>Payment Method:</strong> ${escapeHtml(order.payment)}</p>
+
+      <h3>Products</h3>
+
+      <table border="1" cellpadding="8" cellspacing="0"
+        style="border-collapse:collapse;width:100%;">
+
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Size / Color</th>
+            <th>Qty</th>
+            <th>Price</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          ${itemsHtml}
+        </tbody>
+
+      </table>
+
+      <p style="margin-top:20px;">
+        <strong>Subtotal:</strong> Rs ${order.subtotal}<br>
+        ${discount > 0
+          ? `<strong>Discount (${escapeHtml(couponCode)}):</strong> -Rs ${discount}<br>`
+          : ''}
+        <strong>Shipping:</strong> ${shipLabel}<br>
+        <strong style="font-size:18px;">Total: Rs ${order.total}</strong>
+      </p>
+
+      <hr>
+
+      <p style="font-size:13px;color:#777;">
+        SHOEPHILE — Love Affair with Shoes
+      </p>
+    </div>`,
+  });
+
+  console.log(`✅ Order email sent successfully for ${order.orderNumber}`);
+
+} catch (emailError) {
+
+  console.error(
+    `❌ Failed to send order email for ${order.orderNumber}:`,
+    emailError
+  );
+}
 
     // Customer confirmation
     sendMail({
