@@ -22,6 +22,8 @@
   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
 >
 </head>
+
+</div>
 <body>
   <!-- Announcement Bar -->
 <div class="announcement-bar">
@@ -92,6 +94,8 @@
       <a href="contact.html">Contact</a>
       <a href="faq.html">FAQ</a>
       <a href="track.html">Track Order</a>
+      <a href="wishlist.html"> Wishlist</a>
+      <a href="cart.html">Cart</a>
     </div>
   </nav>
 
@@ -173,20 +177,94 @@
       </div>
     </div>
   </section>
+<!-- Reviews -->
+<section class="section section-alt">
+  <div class="container">
 
-  <!-- Reviews -->
-  <section class="section section-alt">
-    <div class="container">
-      <div class="section-header fade-in">
-        <p class="section-label">Kind Words</p>
-        <h2 class="section-title">Customer Reviews</h2>
-      </div>
-      <div id="home-reviews" class="fade-in" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.5rem;margin-top:1.5rem;">
-        <!-- Populated by JS -->
-      </div>
+    <div class="section-header fade-in">
+      <p class="section-label">Kind Words</p>
+      <h2 class="section-title">Customer Reviews</h2>
     </div>
-  </section>
 
+    <!-- Existing Reviews -->
+    <div id="home-reviews"
+         class="fade-in"
+         style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.5rem;margin-top:1.5rem;">
+    </div>
+
+    <!-- Write a Review -->
+    <div style="text-align:center;margin-top:2rem;">
+
+      <button
+  type="button"
+  class="write-review-btn"
+  id="writeReviewBtn"
+  onclick="showReviewForm()"
+  style="background:#000;color:#fff;border:1px solid #000;padding:12px 28px;cursor:pointer;">
+  Write a Review
+</button>
+
+    </div>
+
+    <!-- Review Form -->
+    <div
+      id="reviewFormContainer"
+      style="display:none;max-width:600px;margin:2rem auto 0;">
+
+      <form id="reviewForm">
+
+        <div style="margin-bottom:1rem;">
+          <input
+            type="text"
+            id="reviewName"
+            placeholder="Your Name"
+            required
+            style="width:100%;padding:12px;">
+        </div>
+
+        <div style="margin-bottom:1rem;">
+          <select
+            id="reviewRating"
+            required
+            style="width:100%;padding:12px;">
+
+            <option value="">Select Rating</option>
+            <option value="5">★★★★★ — Excellent</option>
+            <option value="4">★★★★☆ — Very Good</option>
+            <option value="3">★★★☆☆ — Good</option>
+            <option value="2">★★☆☆☆ — Fair</option>
+            <option value="1">★☆☆☆☆ — Poor</option>
+
+          </select>
+        </div>
+
+        <div style="margin-bottom:1rem;">
+          <textarea
+            id="reviewText"
+            placeholder="Write your review..."
+            required
+            rows="5"
+            style="width:100%;padding:12px;resize:vertical;"></textarea>
+        </div>
+
+        <button
+          type="submit"
+          class="btn btn-primary"
+          id="submitReviewBtn">
+          Submit Review
+        </button>
+
+        <p
+          id="reviewMessage"
+          style="margin-top:1rem;text-align:center;">
+        </p>
+
+      </form>
+
+    </div>
+
+  </div>
+</section>
   <!-- Newsletter -->
   <section class="newsletter">
     <div class="container fade-in">
@@ -263,6 +341,30 @@
 <script src="js/main.js"></script>
   <script>
     // Load CMS home hero content
+    function showReviewForm() {
+    const form = document.getElementById("reviewFormContainer");
+
+    if (!form) return;
+
+    if (form.style.display === "none" || form.style.display === "") {
+        form.style.display = "block";
+        form.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+        });
+    } else {
+        form.style.display = "none";
+    }
+}
+   /*nction showReviewForm() {
+    const form = document.getElementById("reviewFormContainer");
+
+    if (form.style.display === "none") {
+        form.style.display = "block";
+    } else {
+        form.style.display = "none";
+    }
+}
     (async function loadHomeContent() {
       try {
         const res = await fetch('/api/content/home');
@@ -285,9 +387,10 @@
         const b2 = document.getElementById('hero-btn2');
         if (b2) { if (c.btn2Text) b2.textContent = c.btn2Text; if (c.btn2Url) b2.href = c.btn2Url; }
       } catch (e) {}
-    })();
+    })();*/
 
     // Load home reviews
+   
     (async function() {
       try {
         const res = await fetch('/api/reviews');
@@ -307,6 +410,71 @@
         `).join('');
       } catch(e) {}
     })();
+    // Submit customer review
+document.getElementById('reviewForm')?.addEventListener('submit', async function(e) {
+
+    e.preventDefault();
+
+    const name = document.getElementById('reviewName').value.trim();
+    const rating = Number(document.getElementById('reviewRating').value);
+    const text = document.getElementById('reviewText').value.trim();
+
+    const message = document.getElementById('reviewMessage');
+    const submitBtn = document.getElementById('submitReviewBtn');
+
+    if (!name || !rating || !text) {
+        message.textContent = 'Please fill in all fields.';
+        return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Submitting...';
+    message.textContent = '';
+
+    try {
+
+        const res = await fetch('/api/reviews', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                name: name,
+                rating: rating,
+                text: text
+            })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            throw new Error(data.message || data.error || 'Failed to submit review');
+        }
+
+        message.textContent =
+            'Thank you! Your review has been submitted for approval.';
+
+        message.style.color = 'green';
+
+        document.getElementById('reviewForm').reset();
+
+    } catch (error) {
+
+        console.error('Review submission error:', error);
+
+        message.textContent =
+            error.message || 'Something went wrong. Please try again.';
+
+        message.style.color = 'red';
+
+    } finally {
+
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Review';
+
+    }
+
+});
   </script>
 </body>
 </html>

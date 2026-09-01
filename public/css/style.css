@@ -1439,3 +1439,89 @@ body {
     font-size: 13px;
   }
 }
+@media (max-width: 768px) {
+    .header-actions > a.header-action {
+        display: none !important;
+    }
+}
+@media (max-width: 768px) {
+    .hero {
+        min-height: 520px !important;
+        height: auto !important;
+    }
+
+    .hero-content {
+        padding-bottom: 40px !important;
+    }
+
+    .hero-actions {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 16px !important;
+    }
+
+    .hero-actions a {
+        display: flex !important;
+        width: 100% !important;
+        min-height: 50px !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+}
+/* Review Modal */
+
+.review-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 9999;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.review-modal-content {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  background: var(--white);
+  padding: 2rem;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.review-modal-content h2 {
+  margin-bottom: 1.5rem;
+}
+
+.review-modal-content input,
+.review-modal-content select,
+.review-modal-content textarea {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 1rem;
+  border: 1px solid var(--border);
+  background: var(--white);
+  color: var(--text);
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.review-modal-content textarea {
+  resize: vertical;
+}
+
+.review-close {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  border: none;
+  background: transparent;
+  font-size: 28px;
+  cursor: pointer;
+  color: var(--text);
+}
+.review-modal {
+    display: none;
+}

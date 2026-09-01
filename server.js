@@ -1563,20 +1563,55 @@ app.get('/api/reviews/admin', requireAdmin, async (_req, res) => {
 app.post('/api/reviews', async (req, res) => {
   try {
     const { productId, name, rating, text } = req.body || {};
-    if (!productId || !name || !rating || !text) {
-      return res.status(400).json({ error: 'productId, name, rating and text are required' });
+
+    if (!name || !rating || !text) {
+      return res.status(400).json({
+        error: 'Name, rating and review text are required'
+      });
     }
-    const r = Math.min(5, Math.max(1, parseInt(rating, 10) || 5));
+
+    const r = Math.min(
+      5,
+      Math.max(1, parseInt(rating, 10) || 5)
+    );
+
     const col = await reviewsCol();
+
     const doc = {
-      productId: isNaN(productId) ? productId : parseInt(productId, 10),
+      productId: productId
+        ? (isNaN(productId) ? productId : parseInt(productId, 10))
+        : null,
+
       name: String(name).trim().slice(0, 80),
+
       rating: r,
+
       text: String(text).trim().slice(0, 2000),
+
       status: 'pending',
+
       verified: false,
-      createdAt: new Date(),
+
+      createdAt: new Date()
     };
+
+    const result = await col.insertOne(doc);
+
+    res.status(201).json({
+      success: true,
+      id: result.insertedId.toString(),
+      message: 'Review submitted for approval'
+    });
+
+  } catch (err) {
+    console.error('Review submission error:', err);
+
+    res.status(500).json({
+      error: 'Failed to submit review',
+      details: err.message
+    });
+  }
+});
     const result = await col.insertOne(doc);
     res.json({ success: true, id: result.insertedId.toString(), message: 'Review submitted for approval' });
   } catch (err) {
