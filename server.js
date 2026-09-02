@@ -1612,13 +1612,7 @@ app.post('/api/reviews', async (req, res) => {
     });
   }
 });
-    const result = await col.insertOne(doc);
-    res.json({ success: true, id: result.insertedId.toString(), message: 'Review submitted for approval' });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
+    
 app.patch('/api/reviews/:id', requireAdmin, async (req, res) => {
   try {
     const col = await reviewsCol();
