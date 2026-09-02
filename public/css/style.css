@@ -1525,3 +1525,12 @@ body {
 .review-modal {
     display: none;
 }
+@media (max-width: 768px) {
+    .theme-toggle {
+        display: none !important;
+    }
+
+    .header-actions .header-action[aria-label="Shopping bag"] {
+        display: flex !important;
+    }
+}
