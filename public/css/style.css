@@ -140,6 +140,10 @@ overflow-x: hidden;
 
 -webkit-font-smoothing: antialiased;
 
+/* Reserve space for fixed announcement + header */
+
+padding-top: calc(var(--announcement-h) + var(--nav-h));
+
 }
 
 img {
@@ -195,6 +199,10 @@ button {
 cursor: pointer;
 
 }
+
+/* ============================================
+ANNOUNCEMENT BAR (fixed at top)
+============================================ */
 
 .announcement-bar {
 
@@ -536,8 +544,7 @@ stroke-width: 1.5;
 
 /* ============================================
 
-HEADER
-
+HEADER (fixed directly under announcement)
 ============================================ */
 
 .site-header {
@@ -611,24 +618,22 @@ MOBILE
 :root {
   --announcement-h: 38px;
 }
+
 .announcement-bar {
-
-height: var(--announcement-h);
-
+  height: var(--announcement-h);
 }
 
 #announcementText {
-
-font-size: 9px;
-
-letter-spacing: 1.5px;
-
+  font-size: 9px;
+  letter-spacing: 1.5px;
 }
 
 .site-header {
+  top: var(--announcement-h);
+}
 
-top: var(--announcement-h);
-
+body {
+  padding-top: calc(var(--announcement-h) + var(--nav-h));
 }
 
 }
@@ -2169,182 +2174,6 @@ transform: scale(1.08);
 
 }
 
-/* =========================================
-
-ANNOUNCEMENT BAR
-
-========================================= */
-
-.announcement-bar {
-
-width: 100%;
-
-height: 42px;
-
-background: #f3f3f3;
-
-color: #555555;
-
-display: flex;
-
-align-items: center;
-
-justify-content: center;
-
-overflow: hidden;
-
-position: relative;
-
-z-index: 1000;
-
-}
-
-.announcement-content {
-
-display: flex;
-
-align-items: center;
-
-justify-content: center;
-
-width: 100%;
-
-height: 100%;
-
-padding: 0 20px;
-
-}
-
-#announcementText {
-
-font-family: 'Jost', sans-serif;
-
-font-size: 11px;
-
-font-weight: 500;
-
-letter-spacing: 2px;
-
-text-transform: uppercase;
-
-text-align: center;
-
-transition: opacity 0.4s ease, transform 0.4s ease;
-
-}
-
-/* Animation classes */
-
-#announcementText.fade-out {
-
-opacity: 0;
-
-transform: translateY(-8px);
-
-}
-
-#announcementText.fade-in {
-
-opacity: 1;
-
-transform: translateY(0);
-
-}
-
-/* Mobile */
-
-@media (max-width: 600px) {
-
-.announcement-bar {
-
-    height: 38px;
-
-}
-
-\#announcementText {
-
-    font-size: 9px;
-
-    letter-spacing: 1.5px;
-
-}
-
-}
-
-/* =========================================
-
-FIXED ANNOUNCEMENT + HEADER LAYOUT
-
-========================================= */
-
-body {
-
-padding-top: calc(var(--announcement-h) + var(--nav-h));
-
-}
-
-/* Keep announcement bar fixed */
-
-.announcement-bar {
-
-position: fixed;
-
-top: 0;
-
-left: 0;
-
-width: 100%;
-
-height: var(--announcement-h);
-
-z-index: 1100;
-
-}
-
-/* Keep main header below announcement bar */
-
-.site-header {
-
-position: fixed;
-
-top: var(--announcement-h);
-
-left: 0;
-
-right: 0;
-
-height: var(--nav-h);
-
-z-index: 1000;
-
-}
-
-/* Mobile */
-
-@media (max-width: 600px) {
-
-body {
-
-padding-top: calc(var(--announcement-h) + var(--nav-h));
-
-}
-
-.announcement-bar {
-
-height: var(--announcement-h);
-
-}
-
-.site-header {
-
-top: var(--announcement-h);
-
-}
-
-}
-
-
-
 /* Account page */
 
 .account-layout {
@@ -2452,9 +2281,7 @@ display: none;
 }
 
 /* =========================
-
 WhatsApp Chat Button
-
 ========================= */
 
 .whatsapp-chat {
@@ -2714,39 +2541,5 @@ display: none;
     display: flex !important;
 
 }
-
-}
-
-.nav-links {
-
-background: rgba(255, 255, 255, 0.65);
-
-backdrop-filter: blur(14px);
-
--webkit-backdrop-filter: blur(14px);
-
-border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-
-}
-
-.nav-links  {
-
-position: fixed;
-
-top: 0;
-
-left: 0;
-
-width: 100%;
-
-z-index: 1000;
-
-background: rgba(255, 255, 255, 0.65);
-
-backdrop-filter: blur(14px);
-
--webkit-backdrop-filter: blur(14px);
-
-border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 
 }
