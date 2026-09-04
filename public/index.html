@@ -342,55 +342,48 @@
 <script src="js/cart.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/main.js"></script>
-  <script>
-    // Load CMS home hero content
-    function showReviewForm() {
-    const form = document.getElementById("reviewFormContainer");
+  
+<script>
+(async function loadHomeContent() {
+  try {
+    const res = await fetch('/api/content/home');
+    if (!res.ok) return;
 
-    if (!form) return;
+    const c = await res.json();
 
-    if (form.style.display === "none" || form.style.display === "") {
-        form.style.display = "block";
-        form.scrollIntoView({
-            behavior: "smooth",
-            block: "center"
-        });
-    } else {
-        form.style.display = "none";
+    const img = document.getElementById('hero-image');
+
+    if (img && c.heroImage) {
+      img.src = c.heroImage;
+      img.alt = c.heading || 'SHOEPHILE';
+      img.style.display = 'block';
     }
-}
-   /*nction showReviewForm() {
-    const form = document.getElementById("reviewFormContainer");
 
-    if (form.style.display === "none") {
-        form.style.display = "block";
-    } else {
-        form.style.display = "none";
+    const eye = document.getElementById('hero-eyebrow');
+    if (eye && c.eyebrow) eye.textContent = c.eyebrow;
+
+    const h = document.getElementById('hero-heading');
+    if (h && c.heading) h.textContent = c.heading;
+
+    const d = document.getElementById('hero-description');
+    if (d && c.description) d.textContent = c.description;
+
+    const b1 = document.getElementById('hero-btn1');
+    if (b1) {
+      if (c.btn1Text) b1.textContent = c.btn1Text;
+      if (c.btn1Url) b1.href = c.btn1Url;
     }
-}
-    (async function loadHomeContent() {
-      try {
-        const res = await fetch('/api/content/home');
-        if (!res.ok) return;
-        const c = await res.json();
-        const img = document.getElementById('hero-image');
-        if (img && c.heroImage) {
-          img.src = c.heroImage;
-          img.alt = c.heading || 'SHOEPHILE';
-          img.style.display = '';
-        }
-        const eye = document.getElementById('hero-eyebrow');
-        if (eye && c.eyebrow) eye.textContent = c.eyebrow;
-        const h = document.getElementById('hero-heading');
-        if (h && c.heading) h.textContent = c.heading;
-        const d = document.getElementById('hero-description');
-        if (d && c.description) d.textContent = c.description;
-        const b1 = document.getElementById('hero-btn1');
-        if (b1) { if (c.btn1Text) b1.textContent = c.btn1Text; if (c.btn1Url) b1.href = c.btn1Url; }
-        const b2 = document.getElementById('hero-btn2');
-        if (b2) { if (c.btn2Text) b2.textContent = c.btn2Text; if (c.btn2Url) b2.href = c.btn2Url; }
-      } catch (e) {}
-    })();*/
+
+    const b2 = document.getElementById('hero-btn2');
+    if (b2) {
+      if (c.btn2Text) b2.textContent = c.btn2Text;
+      if (c.btn2Url) b2.href = c.btn2Url;
+    }
+
+  } catch (e) {
+    console.error('Home content error:', e);
+  }
+})();
 
     // Load home reviews
    
