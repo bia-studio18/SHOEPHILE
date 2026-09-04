@@ -648,7 +648,7 @@ app.get('/api/products/:id', async (req, res) => {
   }
 });
 
-app.post('/api/products', requireAdmin, upload.array('images', 6), async (req, res) => {
+app.post('/api/products', requireAdmin, upload.array('images', 12), async (req, res) => {
   try {
     const col = await productsCol();
     let colors = [];
