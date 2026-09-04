@@ -884,7 +884,7 @@ color: var(--black); background: transparent; padding: 0.5rem 0;
 
 .hero {
 
-position: relative; height: 420px ; min-height: 350px;
+position: relative; height: 500px ; min-height: 350px;
 
 display: flex; align-items: center; justify-content: center; overflow: hidden;
 
