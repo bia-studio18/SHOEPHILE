@@ -1,59 +1,64 @@
-# SHOEPHILE — Love Affair with Shoes
+# SHOEPHILE — Premium Women's Flats E-commerce
 
-Premium women's flats e-commerce. Express + MongoDB Atlas + static frontend.
+A complete full-stack e-commerce platform for premium women's flats, featuring product management, cart & checkout, coupons, reviews, admin panel, and email notifications.
 
-**Theme:** Ivory `#FFF8F3` + Soft Rose Pink `#D8A0A8` / Deep Rose `#B97883`  
-**Typography:** Cormorant Garamond + Jost  
-**Location:** Lahore, Pakistan · Currency: PKR
+**Live Demo:** [https://shoephile.vercel.app](https://shoephile.vercel.app)
 
-## Setup
+---
+
+### Features
+
+- **Product Catalog**
+  - Multi-image products with color & size variants (36–41)
+  - Stock tracking by size + color
+  - Featured / New / Best-seller flags
+  - SKU support
+
+- **Shopping Experience**
+  - Guest checkout
+  - Cart with free shipping above PKR 3,000
+  - Coupon system (admin-managed & server-validated)
+  - Order tracking page with status timeline
+
+- **Payments**
+  - Cash on Delivery (COD)
+  - Card payments
+  - NayaPay structure ready
+
+- **Reviews System**
+  - Customers submit reviews → Admin approval → Public display
+
+- **Admin Panel**
+  - Manage products, orders, coupons, and reviews
+  - Order filtering and status updates
+
+- **Other**
+  - Email notifications (order confirmation + admin alerts)
+  - Full policy pages (Shipping, Returns, Privacy, Terms, FAQ)
+  - SEO ready (meta tags, Open Graph, sitemap, robots.txt)
+
+---
+
+### Tech Stack
+
+- **Frontend:** HTML, CSS, JavaScript
+- **Backend:** Node.js + Express
+- **Database:** MongoDB Atlas
+- **Deployment:** Vercel
+- **Email:** Nodemailer (Gmail)
+
+---
+
+### Screenshots
+
+> Add 3–4 screenshots here later (Homepage, Product page, Cart, Admin panel)
+
+---
+
+### Getting Started
 
 ```bash
+git clone https://github.com/bia-studio18/SHOEPHILE.git
 cd SHOEPHILE
 npm install
 cp .env.example .env
-# Edit .env: MONGODB_URI, ADMIN_PASSWORD, SMTP_PASS (Gmail App Password)
-npm start
-```
-
-- Store: http://localhost:3000  
-- Admin: http://localhost:3000/admin.html (password from `ADMIN_PASSWORD`)
-
-## Environment variables
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `MONGODB_URI` | Yes | MongoDB Atlas connection string |
-| `MONGODB_DB` | No | Database name (default `shoephile`) |
-| `ADMIN_PASSWORD` | Yes | Admin panel password |
-| `CONTACT_EMAIL` | Yes | Receives order + contact notifications |
-| `SMTP_USER` / `SMTP_PASS` | For email | Gmail + App Password |
-
-## Key features
-
-- **Products:** Multi-image, color names, sizes 36–41, stock by size+color, featured / new / best-seller flags, SKU
-- **Cart & Checkout:** Guest checkout, free shipping above PKR 3,000, server-side totals
-- **Payments:** COD · Card · NayaPay (structure ready; credentials via env later)
-- **Coupons:** Admin create/edit, server-validated on order
-- **Reviews:** Customer submit → pending → admin approve → public display
-- **Orders:** Full status timeline, tracking page, admin filters
-- **Email:** Order confirmation to customer + admin notification
-- **Policies:** Shipping, Returns (10-day), Privacy, Terms, FAQ
-- **SEO:** Meta, OG, robots.txt, sitemap
-
-## Deploy (Vercel)
-
-1. Connect repo  
-2. Set env vars in Vercel project settings  
-3. Build: leave empty or `npm install`  
-4. `vercel.json` routes all traffic through `server.js`
-
-Without `SMTP_PASS`, forms still succeed; emails are logged to the console.
-
-## Collections (MongoDB)
-
-- `products` — existing, extended with stock / flags  
-- `orders` — existing, extended with discount / coupon  
-- `subscribers` — existing  
-- `coupons` — new  
-- `reviews` — new  
