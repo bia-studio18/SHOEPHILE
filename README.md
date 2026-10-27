@@ -49,12 +49,6 @@ A complete full-stack e-commerce platform for premium women's flats, featuring p
 
 ---
 
-### Screenshots
-
-> Add 3–4 screenshots here later (Homepage, Product page, Cart, Admin panel)
-
----
-
 ### Getting Started
 
 ```bash
